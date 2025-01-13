@@ -37,7 +37,7 @@ import polars as pl
 RFSD = load_dataset('irlspbru/RFSD')
 
 # Alternatively, this will download ~540MB with all financial statements for 2023
-# to a Polars DataFrame (requires about 8GB or RAM)
+# to a Polars DataFrame (requires about 8GB of RAM)
 RFSD_2023 = pl.read_parquet('hf://datasets/irlspbru/RFSD/RFSD/year=2023/*.parquet')
 ```
 
