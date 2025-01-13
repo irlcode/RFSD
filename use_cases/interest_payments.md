@@ -12,7 +12,7 @@ corporate loans provided inside or outside the realm of public
 securities or banks. The net cost of borrowing rises, access to credit
 deteriorates, and firms find it harder to service the debt overhang.
 Struggling firms might either default or pass on the cost of servicing
-their debt to consumers, leading to higher prices
+their debt to consumers, leading to higher prices.
 
 Bank of Russia staff addressed this question of policy significance
 using firm-level data from Interfax’s SPARK, Russia’s leading business
