@@ -37,7 +37,7 @@ We benefit from the fact that the openly available Russian Financial
 Statements Database geocodes most of the firms by their address of
 incorporation. The geocoding is done at a very fine level: throughout
 2014-2023 88.8% of total revenue is geocoded up to a house or street on
-average in the RFSD. In this way, we are able to simply aggregatethe
+average in the RFSD. In this way, we are able to simply aggregate the
 value added of firms in an area of interest to obtain the spatialization
 of GDP.
 
