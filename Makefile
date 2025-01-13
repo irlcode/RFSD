@@ -29,7 +29,7 @@ build_fns_panel : parse_fns_xmls
 	Rscript code/1_financials/2d_build_fns_panel.R
 
 build_filing_panel : build_rosstat_panel build_fns_panel
-	@echo "Creating firm year panel indicating whether a statement was filed for a given year. NB: here we do not consider imputed statements."
+	@echo "Create firm year panel indicating whether a statement was filed for a given year. NB: here we do not consider imputed statements."
 	Rscript code/1_financials/3_build_filing_panel.R
 
 combine_rosstat_fns : build_rosstat_panel build_fns_panel
@@ -43,29 +43,4 @@ build_articulation_panel : combine_rosstat_fns
 adjust_values : combine_rosstat_fns
 	@echo "Adjusting summarizing lines' values where they do not equate sum of corresponding lines."
 	Rscript code/1_financials/6_adjust_values.R
-
-# ================================================================================
-# Build elegibility panel
-
-## This step requires EGRUL frim-year panel, Rosstat's classification codes firm-year, and several other objects constructed outside of this project and not included in this repository
-prepare_egrul_panel : data/egrul_lite.fst data/rosstat_codes_panel.csv 
-	@echo "Create firm-year panel with classification codes to be used to determine eligibility."
-	Rscript code/2_eligibility/1_prepare_egrul_panel.R
-
-## This step also requires additional data handcrated based on official decrees which is not provided in this repository
-mark_eligible_and_exempt : prepare_egrul_panel
-	@echo "Classify firms into eligible to file with Rosstat/FNS in a given year and non-eligible. In latter case add reason for exemption."
-	Rscript code/2_eligibility/2_mark_eligible_and_exempt.R
-
-# ================================================================================
-# Build the published panel
-
-build_russian_financials_panel : mark_eligible_and_exempt adjust_values
-	@echo "Left-join eligibility panel and financials panel, drop non-eligble non-filers, keep all the others."
-	Rscript code/3_final_panel/1_build_final_panel.R
-
-
-
-
-
 
