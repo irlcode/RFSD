@@ -11,7 +11,7 @@ authors:
   given-names: "Dmitriy"
   orcid: "0000-0002-4022-6210"
 title: "Russian Financial Statements Database: A firm-level collection of the universe of financial statements"
-date-released: 2025-01-XX
+date-released: 2025-01-13
 year: 2025
 url: "https://github.com/irlcode/RFSD"
 preferred-citation:
@@ -27,5 +27,5 @@ preferred-citation:
       given-names: "Dmitriy"
       orcid: "0000-0002-4022-6210"
   title: "Russian Financial Statements Database: A firm-level collection of the universe of financial statements"
-  url: "https://arxiv.org/abs/XXXXXX"
+  url: "https://arxiv.org/abs/2501.05841"
   year: 2025
