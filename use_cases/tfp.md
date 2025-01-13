@@ -314,7 +314,7 @@ provide 5 explanations for the apparent failure to replicate KZ exactly:
 
 - **Data differences between Orbis and the RFSD**. The latter source
   includes more firms, as documented in our comparison in the [RFSD
-  companion paper](https://arxiv.org/abs/XXX.XXXX): \> Out of 185,222
+  companion paper](http://arxiv.org/abs/2501.05841): \> Out of 185,222
   firms with financials for 2021 available in our Orbis sample, the vast
   majority of firms (182,641, 98.6%) also have their financials in the
   RFSD for 2021. The firms present in both data sets had over \$2
@@ -325,7 +325,8 @@ provide 5 explanations for the apparent failure to replicate KZ exactly:
 - **Differences in sample restrictions**. We remove firms with gaps in
   data in 2012-2018. This is reasonable as it is impossible to calculate
   the investment proxy variable defined as first difference in capital
-  when capital is unknown any of adjacent years. We do not know how
+  when capital is unknown in any of adjacent years. We do not know how
+  this was handled by KZ.
 
 - **Differences in deflators**. KZ use different sectoral deflators for
   different factors, while we resorted to a simpler solution, using one

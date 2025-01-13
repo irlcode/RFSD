@@ -216,7 +216,7 @@ Both in the replication and in KZ, we observe that the estimated labour elastici
 - **Data differences between Orbis and the RFSD**. The latter source includes more firms, as documented in our comparison in the [RFSD companion paper](http://arxiv.org/abs/2501.05841):
 > Out of 185,222 firms with financials for 2021 available in our Orbis sample, the vast majority of firms (182,641, 98.6\%) also have their financials in the RFSD for 2021. The firms present in both data sets had over \$2 trillion of total revenue or assets, forming the bulk of the Russian economy in 2021. The RFSD also includes 58,835 firms reporting over \$1 million in revenue in 2021 that are missing in Orbis.
 
-- **Differences in sample restrictions**. We remove firms with gaps in data in 2012-2018. This is reasonable as it is impossible to calculate the investment proxy variable defined as first difference in capital when capital is unknown any of adjacent years. We do not know how 
+- **Differences in sample restrictions**. We remove firms with gaps in data in 2012-2018. This is reasonable as it is impossible to calculate the investment proxy variable defined as first difference in capital when capital is unknown in any of adjacent years. We do not know how this was handled by KZ.
 
 - **Differences in deflators**. KZ use different sectoral deflators for different factors, while we resorted to a simpler solution, using one GDP deflator. Also, we do not know the base year in KZ as it is not mentioned in the text (we deflate to 2018 rubles in the replication).
 
