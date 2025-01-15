@@ -333,7 +333,7 @@ assess the benefit of the fine grid provided by the RFSD by juxtaposing
 Kummu et al. \[[6](https://doi.org/10.1038/sdata.2018.4)\]
 spatialization with our spatialization. We will obtain the raster data
 from Kummu et al. for 2015 from
-[Dryad](https://doi.org/10.5061/dryad.dk1j0) (February 13, 2020 version,
+[Dryad](https://doi.org/10.5061/dryad.dk1j0) (February 13, 2020 version),
 cut it to Russia’s extent, and convert to 2015 Rubles, as the RFSD data.
 
 ``` r
