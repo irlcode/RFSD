@@ -256,6 +256,6 @@ Please cite as:
 ```
 
 ## Acknowledgments and Contacts
-Data collection and processing: Sergey Bondarkov, sbondarkov@eu.sbb.ru, Viktor Ledenev, vledenev@eu.spb.ru
+Data collection and processing: Sergey Bondarkov, sbondarkov@eu.spb.ru, Viktor Ledenev, vledenev@eu.spb.ru
 
 Project conception, data validation, and use cases: Dmitriy Skougarevskiy, Ph.D., dskougarevskiy@eu.spb.ru
