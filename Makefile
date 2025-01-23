@@ -1,4 +1,4 @@
-all : build_russian_financials_panel 
+all : adjust_values
 .PHONY : all
 
 # ================================================================================
