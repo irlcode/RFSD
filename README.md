@@ -255,6 +255,10 @@ Please cite as:
 }
 ```
 
+## Media Coverage
+- <a href="https://www.kommersant.ru/doc/7443485" target="_blank"><img src="figures/kommersant_logo_upscaled.png" alt="kommersant" /></a> Kommersant, a leading Russian business daily (January, 2025): https://www.kommersant.ru/doc/7443485
+- <a href="https://www.rbc.ru/spb_sz/25/01/2025/678df2229a79470e3b19affb" target="_blank"><img src="figures/rbc_logo_upscaled.png" alt="kommersant" /></a> RBC, a leading Russian business information website (January, 2025): https://www.rbc.ru/spb_sz/25/01/2025/678df2229a79470e3b19affb
+
 ## Acknowledgments and Contacts
 Data collection and processing: Sergey Bondarkov, sbondarkov@eu.spb.ru, Viktor Ledenev, vledenev@eu.spb.ru
 
