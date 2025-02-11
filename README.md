@@ -232,7 +232,7 @@ Below is our To-Do list, we will be grateful for any contributions you can make.
 - [ ] Better outlier detection procedure (https://github.com/irlcode/rfsd/issues/2)
 - [ ] Better detection of financial firms (https://github.com/irlcode/rfsd/issues/3)
 - [ ] Improve next-year imputation procedure (https://github.com/irlcode/rfsd/issues/4)
-- [ ] Explain differences with [Mogilyat et al. (2024)](https://github.com/irlcode/RFSD/blob/main/use_cases/interest_payments.md) (https://github.com/irlcode/rfsd/issues/5)
+- [X] Explain differences with [Mogilyat et al. (2024)](https://github.com/irlcode/RFSD/blob/main/use_cases/interest_payments.md) (https://github.com/irlcode/rfsd/issues/5)
 - [ ] Explain differences with [Kaukin and Zhemkova (2023)](https://github.com/irlcode/RFSD/blob/main/use_cases/tfp.md) (https://github.com/irlcode/rfsd/issues/6)
 
 

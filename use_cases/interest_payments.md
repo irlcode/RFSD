@@ -74,17 +74,9 @@ scanner <- scan_builder$Finish()
 financials <- as.data.table(scanner$ToTable())
 ```
 
-    ## Warning: Potentially unsafe or invalid elements have been discarded from R metadata.
-    ## ℹ Type: "externalptr"
-    ## → If you trust the source, you can set `options(arrow.unsafe_metadata = TRUE)` to preserve them.
-
 ``` r
 gc()
 ```
-
-    ##             used   (Mb) gc trigger   (Mb) limit (Mb)  max used   (Mb)
-    ## Ncells  11428071  610.4   21263614 1135.6         NA  11435179  610.8
-    ## Vcells 330095436 2518.5  662205981 5052.3      65536 655706610 5002.7
 
 ``` r
 # Rename variables
@@ -189,8 +181,8 @@ plot(figure2)
 <img src="../figures/mogilyat_figure2.png" width="60%"/>
 
 Despite our efforts to replicate the target study filtering procedures,
-the RFSD has slightly more firms than SPARK in each year. This may be
-due to data completeness issues with SPARK, differences in the outlier
+the RFSD has slightly more firms than SPARK each year. This may be due
+to data completeness issues with SPARK, differences in the outlier
 filtering procedure of MMPTT, or differences in the definition of
 financial firms between SPARK and the RFSD.
 
@@ -200,12 +192,14 @@ all firms and for firms with debt:
 
 ``` r
 # Mean and median interest cost ratios
+# Note that the mean is weighted by cost of goods sold
+# in MMPTT
 ## All firms
-interest_cost_ratio_by_year_all_firms <- cbr_sample[, list(meanratio = mean(interest_cost_ratio), medianratio = median(interest_cost_ratio)), by = c("year")]
+interest_cost_ratio_by_year_all_firms <- cbr_sample[, list(meanratio = weighted.mean(interest_cost_ratio, w = costofgoodssold), medianratio = median(interest_cost_ratio)), by = c("year")]
 interest_cost_ratio_by_year_all_firms[, sample := "All firms"]
 
 ## Firms with debt
-interest_cost_ratio_by_year_firms_with_debt <- cbr_sample[has_debt == 1, list(meanratio = mean(interest_cost_ratio), medianratio = median(interest_cost_ratio)), by = c("year")]
+interest_cost_ratio_by_year_firms_with_debt <- cbr_sample[has_debt == 1, list(meanratio = weighted.mean(interest_cost_ratio, w = costofgoodssold), medianratio = median(interest_cost_ratio)), by = c("year")]
 interest_cost_ratio_by_year_firms_with_debt[, sample := "Firms with debt"]
 
 interest_cost_ratio_by_year <- rbind(interest_cost_ratio_by_year_all_firms, interest_cost_ratio_by_year_firms_with_debt, fill = T)
@@ -228,14 +222,10 @@ plot(figure3)
 ![](../figures/interest_figure3-1.png)<!-- -->
 <img src="../figures/mogilyat_figure3.png" width="60%"/>
 
-While the medians are identical, the means tell a different story in the
-RFSD data, being almost twice as large as in the MMPTT calculations. We
-have no explanation for this discrepancy other than material differences
-in the outlier filtering procedures between the target study and our
-replication which we cannot account for here as they are undocumented.
-These differences do matter, as they double the interest expense to cost
-of sales ratio, which was found to be insignificant in the original
-study.
+The medians are identical, while the means are slightly different. We
+explain this discrepancy by differences in the outlier filtering
+procedures between the target study and our replication which we cannot
+account for here as they are undocumented.
 
 We conclude our replication by suggesting an alternative source of data
 for the ratio. Larger companies report their current and investment
@@ -251,11 +241,11 @@ cbr_sample[, interestpayments_cost_ratio := interestpayments/costofgoodssold ]
 
 # Mean and median interest payment to cost ratios
 ## All firms
-interestpayments_cost_ratio_by_year_all_firms <- cbr_sample[!is.na(interestpayments_cost_ratio), list(meanratio = mean(interestpayments_cost_ratio), medianratio = median(interestpayments_cost_ratio)), by = c("year")]
+interestpayments_cost_ratio_by_year_all_firms <- cbr_sample[!is.na(interestpayments_cost_ratio), list(meanratio = weighted.mean(interestpayments_cost_ratio, w = costofgoodssold), medianratio = median(interestpayments_cost_ratio)), by = c("year")]
 interestpayments_cost_ratio_by_year_all_firms[, sample := "All firms"]
 
 ## Firms with debt
-interestpayments_cost_ratio_by_year_firms_with_debt <- cbr_sample[has_debt == 1 & !is.na(interestpayments_cost_ratio), list(meanratio = mean(interestpayments_cost_ratio), medianratio = median(interestpayments_cost_ratio)), by = c("year")]
+interestpayments_cost_ratio_by_year_firms_with_debt <- cbr_sample[has_debt == 1 & !is.na(interestpayments_cost_ratio), list(meanratio = weighted.mean(interestpayments_cost_ratio, w = costofgoodssold), medianratio = median(interestpayments_cost_ratio)), by = c("year")]
 interestpayments_cost_ratio_by_year_firms_with_debt[, sample := "Firms with debt"]
 
 interestpayments_cost_ratio_by_year <- rbind(interestpayments_cost_ratio_by_year_all_firms, interestpayments_cost_ratio_by_year_firms_with_debt, fill = T)
@@ -276,5 +266,4 @@ plot(figure3_alt)
 
 ![](../figures/interest_figure3alt-1.png)<!-- -->
 
-Here we observe an even higher interest/cost ratio, possibly indicating
-a greater role for the cost channel in the Russian economy.
+Here we observe a different interest/cost ratio.
