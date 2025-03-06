@@ -75,6 +75,11 @@ scan_builder$Project(cols = c("inn", "ogrn", "year", "okved_section", "okved", "
 scanner <- scan_builder$Finish()
 financials <- as.data.table(scanner$ToTable())
 gc()
+
+# Rename variables
+setnames(financials, c("line_1150", "line_2110", "line_4121", "line_4122"),
+					 c("capital", "revenue", "materials", "labour"),
+		skip_absent = T)
 ```
 
 # Filtering
