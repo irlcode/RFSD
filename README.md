@@ -1,5 +1,5 @@
 # The Russian Financial Statements Database (RFSD)
-[![Hugging Face](https://img.shields.io/badge/🤗_Hugging_Face-_oItsMineZ)](https://huggingface.co/datasets/irlspbru/RFSD) &nbsp;&nbsp;&nbsp; [![Zenodo](http://img.shields.io/badge/DOI-10.5281%20%2F%20zenodo.14622209-blue.svg)](https://doi.org/10.5281/zenodo.14622209) &nbsp;&nbsp;&nbsp; [![arXiv](https://img.shields.io/badge/arXiv-2501.05841-b31b1b.svg)](https://arxiv.org/abs/2501.05841) &nbsp;&nbsp;&nbsp; [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC_BY—NC—SA_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/) &nbsp;&nbsp;&nbsp; ![R](https://img.shields.io/badge/R-4.0+-blue) &nbsp;&nbsp;&nbsp; ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg) 
+[![Hugging Face](https://img.shields.io/badge/🤗_Hugging_Face-_oItsMineZ)](https://huggingface.co/datasets/irlspbru/RFSD) &nbsp;&nbsp;&nbsp; [![Zenodo](http://img.shields.io/badge/DOI-10.5281%20%2F%20zenodo.14622209-blue.svg)](https://doi.org/10.5281/zenodo.14622209) &nbsp;&nbsp;&nbsp; [![arXiv](https://img.shields.io/badge/arXiv-2501.05841-b31b1b.svg)](https://arxiv.org/abs/2501.05841) &nbsp;&nbsp;&nbsp; [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/) &nbsp;&nbsp;&nbsp; ![R](https://img.shields.io/badge/R-4.0+-blue) &nbsp;&nbsp;&nbsp; ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg) 
 
 The Russian Financial Statements Database (RFSD) is an open, harmonized collection of annual unconsolidated financial statements of the universe of Russian firms:
 
@@ -237,8 +237,8 @@ Below is our To-Do list, we will be grateful for any contributions you can make.
 
 
 ## Licence
-<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />
-Creative Commons License Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0).
+<a rel="license" href="https://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+Creative Commons License Attribution 4.0 International (CC BY 4.0).
 
 Copyright © the respective contributors, as shown by the `AUTHORS` file.
 
