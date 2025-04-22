@@ -24,7 +24,7 @@ extr_val <- function(doc, node_name, att) {
 
 
 # Gets values and writes to CSV
-parse_xml <- function(xml_path, temp_output_dir) {
+parse_xml <- function(xml_path, dir_year, temp_output_dir) {
 
     process_id <- Sys.getpid() # to use in file names so that every process writes in its own file
 
@@ -75,14 +75,14 @@ parse_xml <- function(xml_path, temp_output_dir) {
                                              designated_use)
 
                                     # Append new row to file on disk
-                                    output_file <- glue::glue("{temp_output_dir}/{year}_{process_id}_cur_result.csv")
+                                    output_file <- glue::glue("{temp_output_dir}/{dir_year}_{process_id}_cur_result.csv")
                                     fwrite(as.data.table(row), output_file, append = file.exists(output_file))
 
                                     TRUE
 
                                 },
                                 error = function(e) {
-                                    failed_xmls <- glue::glue("{temp_output_dir}/{year}_corrupted_xmls_{process_id}.csv")
+                                    failed_xmls <- glue::glue("{temp_output_dir}/{dir_year}_corrupted_xmls_{process_id}.csv")
                                     fwrite(data.table(path = xml_path), failed_xmls, append = file.exists(failed_xmls))
                                     message("cur year")
                                     message(e$message)
@@ -142,7 +142,7 @@ parse_xml <- function(xml_path, temp_output_dir) {
                                                        cashflow_lag1, 
                                                        designated_use_lag1)
 
-                                         output_file <- glue::glue("{temp_output_dir}/{year}_{process_id}_lag1_result.csv")
+                                         output_file <- glue::glue("{temp_output_dir}/{dir_year}_{process_id}_lag1_result.csv")
                                          fwrite(as.data.table(row_lag1), output_file, append = file.exists(output_file))
 
                                      },
@@ -168,7 +168,7 @@ parse_xml <- function(xml_path, temp_output_dir) {
                                                        balance_lag2,  
                                                        list(line_3600 = net_assets_lag2))
 
-                                         output_file <- glue::glue("{temp_output_dir}/{year}_{process_id}_lag2_result.csv")
+                                         output_file <- glue::glue("{temp_output_dir}/{dir_year}_{process_id}_lag2_result.csv")
                                          fwrite(as.data.table(row_lag2), output_file, append = file.exists(output_file))
 
                                      },
@@ -184,7 +184,7 @@ parse_xml <- function(xml_path, temp_output_dir) {
         )
 
         # Log that this XML has been processed
-        processed_xmls_log <- glue::glue("{temp_output_dir}/{year}_{process_id}_done.csv")
+        processed_xmls_log <- glue::glue("{temp_output_dir}/{dir_year}_{process_id}_done.csv")
         fwrite(data.table(path = xml_path), processed_xmls_log, append = file.exists(processed_xmls_log))
 
     }
