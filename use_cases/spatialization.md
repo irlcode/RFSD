@@ -141,6 +141,14 @@ scan_builder$Project(cols = c("inn", "ogrn", "region", "year", "eligible", "file
 scanner <- scan_builder$Finish()
 financials <- as.data.table(scanner$ToTable())
 gc()
+
+# Rename variables
+setnames(financials, c("line_2110", "line_4121"),
+					 c("revenue", "materials"),
+		skip_absent = T)
+
+# Reverse sign for negative-only variables
+financials[, materials := -materials]
 ```
 
 # Filtering

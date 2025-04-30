@@ -41,7 +41,7 @@ Note that here we import only a handful of variables necessary and one year of i
 ```{r ingestion}
 RFSD <- open_dataset("local/path/to/RFSD")
 scan_builder <- RFSD$NewScan()
-scan_builder$Filter(Expression$field_ref("year") = 2015)
+scan_builder$Filter(Expression$field_ref("year") == 2015)
 scan_builder$Project(cols = c("inn", "ogrn", "region", "year", "eligible", "filed", "imputed", "financial", "outlier", "line_2110", "line_4121", "geocoding_quality", "lon", "lat"))
 scanner <- scan_builder$Finish()
 financials <- as.data.table(scanner$ToTable())
@@ -51,6 +51,9 @@ gc()
 setnames(financials, c("line_2110", "line_4121"),
 					 c("revenue", "materials"),
 		skip_absent = T)
+
+# Reverse sign for negative-only variables
+financials[, materials := -materials]
 ```
 
 # Filtering

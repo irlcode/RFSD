@@ -71,15 +71,35 @@ project and the years of interest:
 RFSD <- open_dataset("local/path/to/RFSD")
 scan_builder <- RFSD$NewScan()
 scan_builder$Filter(Expression$field_ref("year") >= 2011 & Expression$field_ref("year") <= 2018)
+```
+
+    ## ScannerBuilder
+
+``` r
 scan_builder$Project(cols = c("inn", "ogrn", "year", "okved_section", "okved", "eligible", "filed", "imputed", "outlier", "line_1150", "line_2110", "line_4121", "line_4122"))
+```
+
+    ## ScannerBuilder
+
+``` r
 scanner <- scan_builder$Finish()
 financials <- as.data.table(scanner$ToTable())
 gc()
+```
 
+    ##             used   (Mb) gc trigger   (Mb)  max used   (Mb)
+    ## Ncells  18913574 1010.1   39591448 2114.5  18920479 1010.5
+    ## Vcells 514032305 3921.8 1181186662 9011.8 982604296 7496.7
+
+``` r
 # Rename variables
 setnames(financials, c("line_1150", "line_2110", "line_4121", "line_4122"),
-					 c("capital", "revenue", "materials", "labour"),
-		skip_absent = T)
+                     c("capital", "revenue", "materials", "labour"),
+        skip_absent = T)
+
+# Reverse sign for negative-only variables
+financials[, materials := -materials]
+financials[, labour := -labour]
 ```
 
 # Filtering
@@ -91,18 +111,18 @@ close as possible.
 ## Only eligible firms filing statements or where we could reconstruct
 ## it from previous year data
 financials <- financials[eligible == 1 & (filed == 1 | imputed == 1)]
-uniqueN(financials$inn) # 3976302
+uniqueN(financials$inn) # 3976319
 ```
 
-    ## [1] 3976302
+    ## [1] 3976319
 
 ``` r
 ## Only firms in manufacturing
 financials <- financials[okved_section == "C"]
-uniqueN(financials$inn) # 336995
+uniqueN(financials$inn) # 336992
 ```
 
-    ## [1] 336995
+    ## [1] 336992
 
 # Deflation
 
@@ -112,13 +132,12 @@ will simply deflate all the data with GDP deflator from Russian National
 Accounts.
 
 ``` r
-# Deflate by GDP deflator
-# (see https://rosstat.gov.ru/statistics/accounts)
-gdp_deflator_1 <- as.data.table(read.xlsx("https://rosstat.gov.ru/storage/mediabank/VVP_god_s_1995-2023.xlsx", sheet = 10))
+# Deflate by GDP deflator (the XLSX is obtained from https://rosstat.gov.ru/statistics/accounts)
+gdp_deflator_1 <- as.data.table(read.xlsx("external_data/VVP_god_s_1995-2024.xlsx", sheet = 10))
 gdp_deflator_1 <- as.numeric(gdp_deflator_1[c(3)])
 gdp_deflator_1 <- data.table(year = 1996:2011, deflator = gdp_deflator_1)
-gdp_deflator_2 <- as.data.table(read.xlsx("https://rosstat.gov.ru/storage/mediabank/VVP_god_s_1995-2023.xlsx", sheet = 11))
-gdp_deflator_2 <- as.numeric(gdp_deflator_2[c(3)])
+gdp_deflator_2 <- as.data.table(read.xlsx("external_data/VVP_god_s_1995-2024.xlsx", sheet = 11))
+gdp_deflator_2 <- as.numeric(gdp_deflator_2[c(3)])[1:12] # dropping 2024
 gdp_deflator_2 <- data.table(year = 2012:2023, deflator = gdp_deflator_2)
 
 gdp_deflator <- rbind(gdp_deflator_1, gdp_deflator_2)
@@ -196,7 +215,7 @@ financials <- financials[obs_per_firm_expected == obs_per_firm]
 uniqueN(financials$inn) # 24259
 ```
 
-    ## [1] 24259
+    ## [1] 24260
 
 ``` r
 ## Only firms active for more than 1 year
@@ -204,7 +223,7 @@ financials <- financials[ obs_per_firm > 1]
 uniqueN(financials$inn) # 15121
 ```
 
-    ## [1] 15121
+    ## [1] 15122
 
 ``` r
 financials[, c("obs_per_firm", "obs_per_firm_expected") := NULL]
