@@ -8,20 +8,32 @@ russian_financials[, adj_any := 0]
 
 # Declare imputation function
 impute <- function(dt, imp_target, lines_to_sum, flag_imputation = T) {
+
+    # Transform list of lines to regex to be passed to patterns() in .SDcols
     regex <- paste(lines_to_sum, collapse = "|") 
+
+    # Create environment for DT to address vars without overloading the code with paste0() and get()
     env <- list(imp_target = imp_target, imp_value = paste0(imp_target, "_imp"))
-
-    dt[, useless := pmax(rowSums(is.na(.SD)), rowSums(.SD == 0)) == length(lines_to_sum), .SDcols = patterns(regex) ]
+    
+    # Calculate new value skipping lines where lines_to_sum are all NA or 0
+    dt[, useless := pmax(rowSums(is.na(.SD)), rowSums(.SD == 0), na.rm = T) == length(lines_to_sum), .SDcols = patterns(regex)]
     dt[useless == F, imp_value := rowSums(.SD, na.rm = T), .SDcols = patterns(regex), env = env]
-
+    
+    # Save original value to a temp column
     dt[, orig_value := imp_target, env = env]
+
+    # Always impute if original value is NA
     dt[is.na(imp_target), imp_target := imp_value, env = env]
+
+    # If original value is present change it to the calculate only where their abs diff is > 4 thousand roubles
     dt[!is.na(imp_target) & !is.na(imp_value), imp_target := fifelse(abs(imp_target - imp_value) > 4, imp_value, imp_target), env = env]
     
+    # If adjustment indicator column was 0 change it to 1
     if(flag_imputation == T) {
         dt[, adj_any := pmax(adj_any, imp_target != orig_value | (!is.na(imp_target) & is.na(orig_value)), na.rm = T), env = env]
     }
-
+    
+    # Delete temp columns
     dt[, imp_value := NULL, env = env]
     dt[, useless := NULL]
     dt[, orig_value := NULL]
@@ -39,7 +51,7 @@ impute <- function(dt, imp_target, lines_to_sum, flag_imputation = T) {
 # 4:     1    NA       0
 
 
-# Lower levels imputation: sum of XXX[1-9] lines ---------------------------
+# Lower levels imputation: sum of XXX[1-9x] lines ---------------------------
 XXX0_lines_for_simple_imp <- c("line_3210", "line_3220", 
                                "line_3310", "line_3320", 
                                "line_4110", "line_4120",
@@ -76,16 +88,9 @@ russian_financials_simple <- russian_financials[simplified == 1]
 rm(russian_financials)
 gc()
 
-
 ## Full statements 
-### Prepare some lines
-# for(l in c("line_1320", "line_2120", "line_2210", "line_2220", "line_2330", "line_2350",
-           # "line_3220", "line_3320", "line_4120", "line_4220", "line_4320")) {
-    # russian_financials_full[, l_neg := -l, env = list(l = l, l_neg = paste0(l, "_neg"))]
-# }
 ### Impute
 impute(russian_financials_full, "line_1300", c("line_1310", "line_1320", "line_1340", "line_1350", "line_1360", "line_1370"))
-# TODO: in NGOs case imputation of line 1300 should be different: line 1320 included as positive, 
 impute(russian_financials_full, "line_1600", c("line_1100", "line_1200"))
 impute(russian_financials_full, "line_1700", c("line_1300", "line_1400", "line_1500"))
 impute(russian_financials_full, "line_2100", c("line_2110", "line_2120"))
@@ -94,13 +99,7 @@ impute(russian_financials_full, "line_2300", c("line_2200", "line_2310", "line_2
 
 # Impute 24XX
 
-## Imputing 2412 and 2410 is theoretically right but in practice it adds erroneous values:
-## 2411, 2412 as well as 2430 and 2450 often contain mistakes which affect 
-## the otherwise correct 2410 and, in turn, 2400.
-# impute(russian_financials_full[year >= 2019], "line_2412", c("line_2430", "line_2450"))
-# russian_financials_full[, line_2411 := -line_2411]
-# impute(russian_financials_full[year >= 2019], "line_2410", c("line_2411", "line_2412"))
-
+## Imputing 2412 and 2410 is theoretically right but in practice it adds erroneous values
 impute(russian_financials_full, "line_2400", c("line_2300", "line_2410", "line_2460"))
 
 # # Check
@@ -160,10 +159,6 @@ impute(russian_financials_full, "line_4400", c("line_4100", "line_4200", "line_4
 impute(russian_financials_full, "line_4500", c("line_4400", "line_4450", "line_4490"))
 
 ## Simplified statements
-### Prepare some lines
-# for(l in c("line_2120", "line_2330", "line_2350", "line_2410")) {
-    # russian_financials_simple[, l_neg := -l, env = list(l = l, l_neg = paste0(l, "_neg"))]
-# }
 ### Impute
 impute(russian_financials_simple, "line_1600", c("line_1150", "line_1170", "line_1210", "line_1250", "line_1230"))
 impute(russian_financials_simple, "line_1700", c("line_1300", "line_1350", "line_1360", "line_1410", "line_1450", "line_1510", "line_1520", "line_1550"))
@@ -176,11 +171,6 @@ russian_financials_simple[, line_2500 := line_2400]
 
 # Combine data 
 russian_financials <- rbindlist(list(russian_financials_full, russian_financials_simple), use.names=T, fill=T)
-# lines_to_delete <- grep("\\d_neg", names(russian_financials), value = T)
-# russian_financials[, (lines_to_delete) := NULL]
-
-# print(russian_financials[, .(adj_any = mean(adj_any)), keyby = year])
-# print(russian_financials[, .N, keyby = year])
 
 # Tidy up and save
 setorderv(russian_financials, c("inn", "year"))
