@@ -2,27 +2,29 @@ library(fst)
 library(data.table)
 setDTthreads(0)
 library(ggplot2)
-source("financials/helpers/check_articulation_functions.R")
+source("code/data_processing/helpers/check_articulation_functions.R")
+
+articulation_path <- file.path("output", "articulation")
+dir.create(articulation_path, recursive = T, showWarnings = F)
 
 # Load panel ===================================================================
 russian_financials <- read_fst("temp/combined_financials_impFrNY_negLinesCorr.fst", as.data.table = T)
-
 russian_financials[, articulation_basic := as.numeric(line_1600 == line_1700)]
 
 # Separate checks =================================================================
 
-rosneft <- russian_financials[inn == "7706107510"]
-gazprom <- russian_financials[inn == "7736050003"]
-
-check_balance_full(rosneft)
-check_finres_full(rosneft)
-check_cashflow_full(rosneft)
-rosneft[, .SD, .SDcols = patterns("year|fine")]
-
-check_balance_full(gazprom)
-check_finres_full(gazprom)
-check_cashflow_full(gazprom)
-gazprom[, .SD, .SDcols = patterns("year|fine")]
+# rosneft <- russian_financials[inn == "7706107510"]
+# gazprom <- russian_financials[inn == "7736050003"]
+#
+# check_balance_full(rosneft)
+# check_finres_full(rosneft)
+# check_cashflow_full(rosneft)
+# rosneft[, .SD, .SDcols = patterns("year|fine")]
+#
+# check_balance_full(gazprom)
+# check_finres_full(gazprom)
+# check_cashflow_full(gazprom)
+# gazprom[, .SD, .SDcols = patterns("year|fine")]
 
 # ================================================================================
 russian_financials_full <- russian_financials[simplified == 0]
@@ -64,31 +66,31 @@ plot_check_failed_share <- function(dt, check_name) {
         labs(y = "Failed checks share", y = "")
 
     print(pl)
+}
 
 
 
 ## Full statements
 check_balance_full(russian_financials_full)
 plot_check_failed_share(russian_financials_full, "balance")
-ggsave("output/balance_check_full_impFrNY.pdf", width = 12, height = 7)
+ggsave(file.path(articulation_path, "balance_check_full_impFrNY.pdf"), width = 12, height = 7)
 
 check_finres_full(russian_financials_full)
 plot_check_failed_share(russian_financials_full, "finres")
-ggsave("output/finres_check_full_impFrNY.pdf", width = 12, height = 7)
+ggsave(file.path(articulation_path, "finres_check_full_impFrNY.pdf"), width = 12, height = 7)
 
 check_cashflow_full(russian_financials_full)
 plot_check_failed_share(russian_financials_full, "cashflow")
-ggsave("output/cashflow_check_full_impFrNY.pdf", width = 12, height = 7)
-
+ggsave(file.path(articulation_path, "cashflow_check_full_impFrNY.pdf"), width = 12, height = 7)
 
 ## Simplified statements
 check_balance_simple(russian_financials_simple)
 plot_check_failed_share(russian_financials_simple, "balance")
-ggsave("output/balance_check_simple_impFrNY.pdf", width = 12, height = 7)
+ggsave(file.path(articulation_path, "balance_check_simple_impFrNY.pdf"), width = 12, height = 7)
 
 check_finres_simple(russian_financials_simple)
 plot_check_failed_share(russian_financials_simple, "finres")
-ggsave("output/finres_check_simple_impFrNY.pdf", width = 12, height = 7)
+ggsave(file.path(articulation_path, "finres_check_simple_impFrNY.pdf"), width = 12, height = 7)
 
 # Check articulation ===============================================================
 
@@ -99,4 +101,6 @@ russian_financials <- rbindlist(list(russian_financials_full, russian_financials
 
 # Save =============================================================================
 setorderv(russian_financials, c("inn", "year"))
-write_fst(russian_financials[, .(inn, year, new_obs, simplified, articulation, articulation_basic,  imp_any_from_future)], "output/articulation_impFrNY.fst")
+write_fst(russian_financials[, .(inn, year, new_obs, simplified, 
+                                 articulation, articulation_basic, imp_any_from_future)], 
+          file.path(articulation_path, "articulation_panel.fst"))
