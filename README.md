@@ -234,8 +234,8 @@ All notable changes to this project will be documented below. The format is base
 
 ### Fixed
 
-- Fixed a bug in summation of negative lines when calculating line 2400 (net profit). The bug was identified in #7 and the fix is explained in #8.
-- Fixed a bug in adjustment of line 1300 (total capital and reserves) and 2500 (result of the period). See #9 for an explanation.
+- Fixed a bug in summation of negative lines when calculating line 2400 (net profit). The bug was identified in [#7](http://github.com/irlcode/RFSD/issues/7) and the fix is explained in [#8](http://github.com/irlcode/RFSD/issues/8).
+- Fixed a bug in adjustment of line 1300 (total capital and reserves) and 2500 (result of the period). See [#9](http://github.com/irlcode/RFSD/issues/9) for an explanation.
 
 The updated lines 2400 are quite different from the original values. The value of line 2400 changed in 6-11% of observations in 2011-2018 and in about 25% observations in 2019-2023, the summed difference in the original and new values ranges from 5% to 110% depending on year. The fix for sign inconsistency implies revising scripts for all calculations where negative-only, those ()-ed in statement forms, variables were used.
 
