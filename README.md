@@ -216,7 +216,8 @@ The below figure explains how we constructed the dataset. An annotated `Makefile
 ```
 ## Version and Update Policy
 
-Version (SemVer): `1.0.0`.
+Version (SemVer): `1.0.1`.
+
 
 We intend to update the RFSD annualy as the data becomes available, in other words when most of the firms have their statements filed with the Federal Tax Service. The official deadline for filing of previous year statements is April, 1. However, every year a portion of firms either fails to meet the deadline or submits corrections afterwards. As the figure below shows, filing continues up to the very end of the year but after the end of April this stream quickly thins out. Nevertheless, there is obviously a trade-off between minimization of data completeness and version availability. We find it a reasonable compromise to query new data in early June, since on average by the end of May 96.7% statements are already filed, including 86.4% of all the correcting filings. We plan to make a new version of RFSD available by July, 2025.
 
@@ -224,6 +225,17 @@ We intend to update the RFSD annualy as the data becomes available, in other wor
     <img src="figures/filing_by_month.png" alt="Line plot of number of filing by month" />
 </div>
 <br>
+
+## Changelog
+
+All notable changes to this project will be documented below. The format is based on [Keep a Changelog](http://keepachangelog.com/).
+
+## [1.0.1] - 2025-05-13
+
+### Fixed
+
+- Fixed a bug in summation of negative lines when calculating line 2400 (net profit). The bug was identified in #7 and the fix is explained in #8.
+- Fixed a bug in adjustment of line 1300 (total capital and reserves) and 2500 (result of the period). See #9 for an explanation.
 
 ## ToDo and Known Deficiencies
 Below is our To-Do list, we will be grateful for any contributions you can make. If you spot a bug, just raise it as a GitHub issue.
