@@ -60,7 +60,7 @@ import pyarrow.dataset as ds
 import polars as pl
 
 # Read RFSD metadata from local file
-RFSD = ds.dataset("local/path/to/RFSD")
+RFSD = ds.dataset("local/path/to/RFSD", partitioning="hive")
 
 # Use RFSD_dataset.schema to glimpse the data structure and columns' classes
 print(RFSD.schema)
