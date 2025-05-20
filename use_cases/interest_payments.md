@@ -76,8 +76,8 @@ gc()
 ```
 
     ##             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells  11410746  609.4   21239870 1134.4  11417732  609.8
-    ## Vcells 347660209 2652.5  799449461 6099.4 664490010 5069.7
+    ## Ncells  11410744  609.4   21239865 1134.4  11417842  609.8
+    ## Vcells 347660226 2652.5  799449704 6099.4 664490212 5069.7
 
 ``` r
 # Rename variables
@@ -182,7 +182,7 @@ figure2 <- ggplot(aes(x = year), data = firms_by_year) +
 plot(figure2)
 ```
 
-![](interest_payments_files/figure-gfm/figure2-1.png)<!-- -->
+![](../figures/interest_figure2-1.png)<!-- -->
 <img src="../figures/mogilyat_figure2.png" width="60%"/>
 
 Despite our efforts to replicate the target study filtering procedures,
@@ -224,7 +224,7 @@ figure3 <- ggplot(aes(x = year, y = value, group = statistic, fill = statistic, 
 plot(figure3)
 ```
 
-![](interest_payments_files/figure-gfm/figure3-1.png)<!-- -->
+![](../figures/interest_figure3-1.png)<!-- -->
 <img src="../figures/mogilyat_figure3.png" width="60%"/>
 
 The medians are identical, while the means are slightly different. We
@@ -269,7 +269,7 @@ figure3_alt <- ggplot(aes(x = year, y = value, group = statistic, fill = statist
 plot(figure3_alt)
 ```
 
-![](interest_payments_files/figure-gfm/figure3alt-1.png)<!-- -->
+![](../figures/interest_figure3alt-1.png)<!-- -->
 
 Here we observe an even higher interest/cost ratio, possibly indicating
 a greater role for the cost channel in the Russian economy.
