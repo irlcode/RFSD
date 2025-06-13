@@ -24,7 +24,7 @@ Although well accepted in the literature (see
 \[[6](https://doi.org/10.1038/sdata.2018.4),
 [7](https://doi.org/10.1038/s41597-022-01322-5)\] as the most widely
 used data sources), these GDP spatializations may suffer from
-measurement errors in night lights (e.g. upward bias introduced by gas
+measurement errors in night lights (e.g. upward bias introduced by gas
 flaring, data omissions due to cloud cover, auroras in high latitudes),
 misclassified land use types, and can only be trusted only if inference
 is conducted in a responsible way (no data leakage, spatial

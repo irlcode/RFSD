@@ -15,7 +15,7 @@ date-released: 2025-01-13
 year: 2025
 url: "https://github.com/irlcode/RFSD"
 preferred-citation:
-  type: unpublished
+  type: article
   authors:
     - family-names: "Bondarkov"
       given-names: "Sergey"
@@ -27,5 +27,9 @@ preferred-citation:
       given-names: "Dmitriy"
       orcid: "0000-0002-4022-6210"
   title: "Russian Financial Statements Database: A firm-level collection of the universe of financial statements"
-  url: "https://arxiv.org/abs/2501.05841"
+  url: "https://doi.org/10.1038/s41597-025-05150-1"
+  doi: "10.1038/s41597-025-05150-1"
+  journal: "Scientific Data"
+  volume: 12
+  issue: 1
   year: 2025

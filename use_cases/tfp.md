@@ -338,7 +338,7 @@ provide 5 explanations for the apparent failure to replicate KZ exactly:
 
 - **Data differences between Orbis and the RFSD**. The latter source
   includes more firms, as documented in our comparison in the [RFSD
-  companion paper](http://arxiv.org/abs/2501.05841): \> Out of 185,222
+  companion paper](https://doi.org/10.1038/s41597-025-05150-1): \> Out of 185,222
   firms with financials for 2021 available in our Orbis sample, the vast
   majority of firms (182,641, 98.6%) also have their financials in the
   RFSD for 2021. The firms present in both data sets had over \$2
