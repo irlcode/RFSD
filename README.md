@@ -1,5 +1,5 @@
 # The Russian Financial Statements Database (RFSD)
-[![Hugging Face](https://img.shields.io/badge/🤗_Hugging_Face-_oItsMineZ)](https://huggingface.co/datasets/irlspbru/RFSD) &nbsp;&nbsp;&nbsp; [![Zenodo](http://img.shields.io/badge/DOI-10.5281%20%2F%20zenodo.14622209-blue.svg)](https://doi.org/10.5281/zenodo.14622209) &nbsp;&nbsp;&nbsp; [![Paper-publication](https://img.shields.io/badge/Scientific-Data-darkred)](https://www.nature.com/articles/s41597-025-05150-1) &nbsp;&nbsp;&nbsp; [![arXiv](https://img.shields.io/badge/arXiv-2501.05841-b31b1b.svg)](https://arxiv.org/abs/2501.05841) &nbsp;&nbsp;&nbsp; [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/) &nbsp;&nbsp;&nbsp; ![R](https://img.shields.io/badge/R-4.0+-blue) &nbsp;&nbsp;&nbsp; ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg) 
+[![Hugging Face](https://img.shields.io/badge/🤗_Hugging_Face-_oItsMineZ)](https://huggingface.co/datasets/irlspbru/RFSD) &nbsp;&nbsp;&nbsp; [![Zenodo](http://img.shields.io/badge/DOI-10.5281%20%2F%20zenodo.14622208-blue.svg)](https://doi.org/10.5281/zenodo.14622208) &nbsp;&nbsp;&nbsp; [![Paper-publication](https://img.shields.io/badge/Scientific-Data-darkred)](https://www.nature.com/articles/s41597-025-05150-1) &nbsp;&nbsp;&nbsp; [![arXiv](https://img.shields.io/badge/arXiv-2501.05841-b31b1b.svg)](https://arxiv.org/abs/2501.05841) &nbsp;&nbsp;&nbsp; [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/) &nbsp;&nbsp;&nbsp; ![R](https://img.shields.io/badge/R-4.0+-blue) &nbsp;&nbsp;&nbsp; ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg) 
 
 The Russian Financial Statements Database (RFSD) is an open, harmonized collection of annual unconsolidated financial statements of the universe of Russian firms:
 
@@ -13,7 +13,7 @@ The Russian Financial Statements Database (RFSD) is an open, harmonized collecti
 
 - 🏗️ Restores as much data as possible through non-invasive data imputation, statement articulation, and harmonization.
 
-The RFSD is hosted on 🤗 [Hugging Face](https://huggingface.co/datasets/irlspbru/RFSD) and [Zenodo](https://doi.org/10.5281/zenodo.14622209) and is stored in a structured, column-oriented, compressed binary format Apache Parquet with yearly partitioning scheme, enabling end-users to query only variables of interest at scale.
+The RFSD is hosted on 🤗 [Hugging Face](https://huggingface.co/datasets/irlspbru/RFSD) and [Zenodo](https://doi.org/10.5281/zenodo.14622208) and is stored in a structured, column-oriented, compressed binary format Apache Parquet with yearly partitioning scheme, enabling end-users to query only variables of interest at scale.
 
 The accompanying paper provides internal and external validation of the data: [https://doi.org/10.1038/s41597-025-05150-1](https://doi.org/10.1038/s41597-025-05150-1).
 
