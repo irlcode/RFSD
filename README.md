@@ -268,7 +268,10 @@ All notable changes to this project will be documented below. The format is base
 - Resolved a bug in the pre-publishing filtering of the panel. We removed all non-eligible non-filers, as intended, but inadvertently excluded observations of non-eligible non-filers whose statements in year X we were able to reconstruct from statements in X+1.
 
 ### Changed
-- The `filed` flag for observed but empty (all-zero) statements is now set to 0. The change it brings is evident on the plot below:
+- The `region_taxcode` now reflects a firm's region of incorporation (previously derived from a firm's INN, which resulted in inaccuracies). The format has been extended from 2 to 4 digits, allowing for differentiation between Arkhangelskaya oblast (`"2900"`) and Nenetskiy AO (`"2983"`), which the former includes.
+- We have revised the statements of all firms previously marked as `outlier` and set the flag to 0 where anomalous revenue has been corrected in the GIR BO database retrospectively.
+- The outlier detection procedure has been updated: now, for each OKVED letter-section, we manually review the statements of the top 30 firms by stated revenue in the last observed year (all statements of these firms are reviewed, not just the most recent one).
+- The `filed` flag for observed but empty (all fields, even Equity, is 0) statements is now set to 0 as it is clearly erroneous. The change this brings is evident on the plot below:
 <div align="center" width="60%">
     <img src="figures/whats_new_2.0.0_filing.png" alt="Line plot of number of eligible firms, filed and imputed statements by year" />
 </div>
