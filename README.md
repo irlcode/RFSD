@@ -9,7 +9,7 @@ The Russian Financial Statements Database (RFSD) is an open, harmonized collecti
 
 - 🏛️ Sourced from two official data providers: the [Rosstat](https://rosstat.gov.ru/opendata/7708234640-7708234640bdboo2018) and the [Federal Tax Service](https://bo.nalog.ru).
 
-- 📅 Covers 2011-2023, will be continuously updated.
+- 📅 Covers 2011-2024, will be continuously updated.
 
 - 🏗️ Restores as much data as possible through non-invasive data imputation, statement articulation, and harmonization.
 
@@ -244,7 +244,7 @@ The below figure explains how we constructed the dataset. An annotated `Makefile
 Version (SemVer): `2.0.0`.
 
 
-We intend to update the RFSD annualy as the data becomes available, in other words when most of the firms have their statements filed with the Federal Tax Service. The official deadline for filing of previous year statements is April, 1. However, every year a portion of firms either fails to meet the deadline or submits corrections afterwards. As the figure below shows, filing continues up to the very end of the year but after the end of April this stream quickly thins out. Nevertheless, there is obviously a trade-off between minimization of data completeness and version availability. We find it a reasonable compromise to query new data in early June, since on average by the end of May 96.7% statements are already filed, including 86.4% of all the correcting filings. We plan to make a new version of RFSD available by July, 2025.
+We intend to update the RFSD annualy as the data becomes available, in other words when most of the firms have their statements filed with the Federal Tax Service. The official deadline for filing of previous year statements is April, 1. However, every year a portion of firms either fails to meet the deadline or submits corrections afterwards. As the figure below shows, filing continues up to the very end of the year but after the end of April this stream quickly thins out. Nevertheless, there is obviously a trade-off between minimization of data completeness and version availability. We find it a reasonable compromise to query new data in early June, since on average by the end of May 96.7% statements are already filed, including 86.4% of all the correcting filings. We plan to update RFSD annualy in late July — early August.
 
 <div align="center" width="60%">
     <img src="figures/filing_by_month.png" alt="Line plot of number of filing by month" />
@@ -254,6 +254,8 @@ We intend to update the RFSD annualy as the data becomes available, in other wor
 ## Changelog
 
 All notable changes to this project will be documented below. The format is based on [Keep a Changelog](http://keepachangelog.com/).
+
+## [2.0.0] - 2025-08-14
 
 ### Added
 - Financial statements for 2024 have been added, totaling approximately 2.25 million observations.
