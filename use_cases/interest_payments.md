@@ -56,7 +56,8 @@ Note that here we import only a handful of variables necessary for this
 project and the years of interest:
 
 ``` r
-RFSD <- open_dataset("local/path/to/RFSD")
+# RFSD <- open_dataset("local/path/to/RFSD")
+RFSD <- open_dataset("/data1/RFSD")
 scan_builder <- RFSD$NewScan()
 scan_builder$Filter(Expression$field_ref("year") >= 2019 & Expression$field_ref("year") <= 2023)
 ```
@@ -76,8 +77,8 @@ gc()
 ```
 
     ##             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells  11410744  609.4   21239865 1134.4  11417842  609.8
-    ## Vcells 347660226 2652.5  799449704 6099.4 664490212 5069.7
+    ## Ncells  11467458  612.5   21423418 1144.2  11474550  612.9
+    ## Vcells 359515377 2742.9  827762445 6315.4 821263028 6265.8
 
 ``` r
 # Rename variables
@@ -98,61 +99,61 @@ close as possible.
 ``` r
 # Only non-financial firms
 financials <- financials[okved_section != "K"]
-uniqueN(financials$inn) # 4967290
+uniqueN(financials$inn) # 4995763
 ```
 
-    ## [1] 4967290
+    ## [1] 4995763
 
 ``` r
 ## Only firms filing statements or where we could reconstruct
 ## it from previous year data
 cbr_sample <- financials[filed == 1 | imputed == 1]
-uniqueN(cbr_sample$inn) # 3181727
+uniqueN(cbr_sample$inn) # 3219916
 ```
 
-    ## [1] 3181727
+    ## [1] 3219916
 
 ``` r
 ## Remove firms where at least one of variables is missing
 cbr_sample <- cbr_sample[!is.na(revenue) & !is.na(costofgoodssold) & !is.na(salesprofit) & !is.na(grossprofit) ]
-uniqueN(cbr_sample$inn) # 2262553
+uniqueN(cbr_sample$inn) # 2266981
 ```
 
-    ## [1] 2262553
+    ## [1] 2266981
 
 ``` r
 ## Remove firms with zero revenue or cost of goods sold
 cbr_sample <- cbr_sample[revenue != 0 & costofgoodssold != 0]
-uniqueN(cbr_sample$inn) # 2175409
+uniqueN(cbr_sample$inn) # 2179424
 ```
 
-    ## [1] 2175409
+    ## [1] 2179424
 
 ``` r
 ## Remove firms where assets do not match liablities and equity
 cbr_sample <- cbr_sample[ assets == liabilities_equity ]
-uniqueN(cbr_sample$inn) # 2172179
+uniqueN(cbr_sample$inn) # 2176181
 ```
 
-    ## [1] 2172179
+    ## [1] 2176181
 
 ``` r
 ## Remove firms without interest payments
 cbr_sample <- cbr_sample[interestpayable != 0 & !is.na(interestpayable)]
-uniqueN(cbr_sample$inn) # 372306
+uniqueN(cbr_sample$inn) # 372717
 ```
 
-    ## [1] 372306
+    ## [1] 372717
 
 ``` r
 ## Remove outlier firms in terms of interestpayable to costofgoodssold ratio
 cbr_sample[, interest_cost_ratio := interestpayable/costofgoodssold]
 trim_cutoffs <- quantile(cbr_sample$interest_cost_ratio, c(0.015, 0.985))
 cbr_sample <- cbr_sample[ interest_cost_ratio >= trim_cutoffs[1] & interest_cost_ratio <= trim_cutoffs[2]]
-uniqueN(cbr_sample$inn) # 364847
+uniqueN(cbr_sample$inn) # 365253
 ```
 
-    ## [1] 364847
+    ## [1] 365253
 
 We also create a variable indicating companies with any debt:
 
@@ -182,7 +183,7 @@ figure2 <- ggplot(aes(x = year), data = firms_by_year) +
 plot(figure2)
 ```
 
-![](../figures/interest_figure2-1.png)<!-- -->
+![](interest_payments_files/figure-gfm/figure2-1.png)<!-- -->
 <img src="../figures/mogilyat_figure2.png" width="60%"/>
 
 Despite our efforts to replicate the target study filtering procedures,
@@ -224,7 +225,7 @@ figure3 <- ggplot(aes(x = year, y = value, group = statistic, fill = statistic, 
 plot(figure3)
 ```
 
-![](../figures/interest_figure3-1.png)<!-- -->
+![](interest_payments_files/figure-gfm/figure3-1.png)<!-- -->
 <img src="../figures/mogilyat_figure3.png" width="60%"/>
 
 The medians are identical, while the means are slightly different. We
@@ -269,7 +270,7 @@ figure3_alt <- ggplot(aes(x = year, y = value, group = statistic, fill = statist
 plot(figure3_alt)
 ```
 
-![](../figures/interest_figure3alt-1.png)<!-- -->
+![](interest_payments_files/figure-gfm/figure3alt-1.png)<!-- -->
 
 Here we observe an even higher interest/cost ratio, possibly indicating
 a greater role for the cost channel in the Russian economy.
