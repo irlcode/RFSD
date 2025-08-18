@@ -183,7 +183,7 @@ figure2 <- ggplot(aes(x = year), data = firms_by_year) +
 plot(figure2)
 ```
 
-![](..figures/interest_figure2-1.png)<!-- -->
+![](../figures/interest_figure2-1.png)<!-- -->
 <img src="../figures/mogilyat_figure2.png" width="60%"/>
 
 Despite our efforts to replicate the target study filtering procedures,
