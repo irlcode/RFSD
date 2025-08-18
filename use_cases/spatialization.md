@@ -62,13 +62,13 @@ library(stringr)
 library(sf)
 ```
 
-    ## Linking to GEOS 3.12.2, GDAL 3.9.2, PROJ 9.4.1; sf_use_s2() is TRUE
+    ## Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE
 
 ``` r
 library(terra)
 ```
 
-    ## terra 1.7.78
+    ## terra 1.8.50
 
     ## 
     ## Attaching package: 'terra'
@@ -136,7 +136,7 @@ available at a fine level of detail for this year.
 ``` r
 RFSD <- open_dataset("local/path/to/RFSD")
 scan_builder <- RFSD$NewScan()
-scan_builder$Filter(Expression$field_ref("year") = 2015)
+scan_builder$Filter(Expression$field_ref("year") == 2015)
 scan_builder$Project(cols = c("inn", "ogrn", "region", "year", "eligible", "filed", "imputed", "financial", "outlier", "line_2110", "line_4121", "geocoding_quality", "lon", "lat"))
 scanner <- scan_builder$Finish()
 financials <- as.data.table(scanner$ToTable())
@@ -144,8 +144,8 @@ gc()
 
 # Rename variables
 setnames(financials, c("line_2110", "line_4121"),
-					 c("revenue", "materials"),
-		skip_absent = T)
+						c("revenue", "materials"),
+						skip_absent = T)
 
 # Reverse sign for negative-only variables
 financials[, materials := -materials]
@@ -153,7 +153,7 @@ financials[, materials := -materials]
 
 # Filtering
 
-Next, we engage in filtering, keeping only non-financial firms (i.e. no
+Next, we engage in filtering, keeping only non-financial firms (i.e. no
 banks, insurers, or brokers) filing non-anomalous statements. Since GDP
 is the sum of value added across industries, we also calculate the value
 added of each firm, defined simply as revenue minus materials.
@@ -168,18 +168,18 @@ financials[revenue > 0 & materials > 0 & (revenue - materials) > 0, va := revenu
 
 # Remove firms with negative value added
 financials <- financials[va >  0]
-uniqueN(financials$inn) # 136429 firms
+uniqueN(financials$inn) # 137805 firms
 ```
 
-    ## [1] 136429
+    ## [1] 137805
 
 ``` r
 # Remove firms with low geocoding quality
 financials <- financials[geocoding_quality %in% c("house", "street")]
-uniqueN(financials$inn) # 122616 firms
+uniqueN(financials$inn) # 122822 firms
 ```
 
-    ## [1] 122616
+    ## [1] 122822
 
 # Aggregation
 
@@ -341,8 +341,9 @@ assess the benefit of the fine grid provided by the RFSD by juxtaposing
 Kummu et al. \[[6](https://doi.org/10.1038/sdata.2018.4)\]
 spatialization with our spatialization. We will obtain the raster data
 from Kummu et al. for 2015 from
-[Dryad](https://doi.org/10.5061/dryad.dk1j0) (February 13, 2020 version),
-cut it to Russia’s extent, and convert to 2015 Rubles, as the RFSD data.
+[Dryad](https://doi.org/10.5061/dryad.dk1j0) (February 13, 2020
+version), cut it to Russia’s extent, and convert to 2015 Rubles, as the
+RFSD data.
 
 ``` r
 # All-Russia boundary
