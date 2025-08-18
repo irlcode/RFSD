@@ -183,7 +183,7 @@ figure2 <- ggplot(aes(x = year), data = firms_by_year) +
 plot(figure2)
 ```
 
-![](interest_payments_files/figure-gfm/figure2-1.png)<!-- -->
+![](..figures/interest_figure2-1.png)<!-- -->
 <img src="../figures/mogilyat_figure2.png" width="60%"/>
 
 Despite our efforts to replicate the target study filtering procedures,
@@ -225,7 +225,7 @@ figure3 <- ggplot(aes(x = year, y = value, group = statistic, fill = statistic, 
 plot(figure3)
 ```
 
-![](interest_payments_files/figure-gfm/figure3-1.png)<!-- -->
+![](../figures/interest_figure3-1.png)<!-- -->
 <img src="../figures/mogilyat_figure3.png" width="60%"/>
 
 The medians are identical, while the means are slightly different. We
@@ -270,7 +270,7 @@ figure3_alt <- ggplot(aes(x = year, y = value, group = statistic, fill = statist
 plot(figure3_alt)
 ```
 
-![](interest_payments_files/figure-gfm/figure3alt-1.png)<!-- -->
+![](../figures/interest_figure3alt-1.png)<!-- -->
 
 Here we observe an even higher interest/cost ratio, possibly indicating
 a greater role for the cost channel in the Russian economy.
