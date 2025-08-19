@@ -9,17 +9,17 @@ The Russian Financial Statements Database (RFSD) is an open, harmonized collecti
 
 - 🏛️ Sourced from two official data providers: the [Rosstat](https://rosstat.gov.ru/opendata/7708234640-7708234640bdboo2018) and the [Federal Tax Service](https://bo.nalog.ru).
 
-- 📅 Covers 2011-2023, will be continuously updated.
+- 📅 Covers 2011-2024, will be continuously updated.
 
 - 🏗️ Restores as much data as possible through non-invasive data imputation, statement articulation, and harmonization.
 
-The RFSD is hosted on 🤗 [Hugging Face](https://huggingface.co/datasets/irlspbru/RFSD) and [Zenodo](https://doi.org/10.5281/zenodo.14622208) and is stored in a structured, column-oriented, compressed binary format Apache Parquet with yearly partitioning scheme, enabling end-users to query only variables of interest at scale.
+The RFSD is hosted on 🤗 [Hugging Face](https://huggingface.co/datasets/irlspbru/RFSD) and [Zenodo](https://doi.org/10.5281/zenodo.14622208) and is stored in a structured, column-oriented, compressed binary format Apache Parquet with yearly partitioning scheme, enabling end users to query only variables of interest at scale.
 
 The accompanying paper provides internal and external validation of the data: [https://doi.org/10.1038/s41597-025-05150-1](https://doi.org/10.1038/s41597-025-05150-1).
 
-Here we present the code used to create the dataset, as well as the instructions for importing the data in R or Python environment and use cases.
+Here we present the code used to create the data set, as well as the instructions for importing the data in an R or Python environment and use cases.
 
-## Importing The Data
+## Importing the Data
 
 You have two options to ingest the data: download the `.parquet` files manually from Hugging Face or Zenodo or rely on 🤗 [Hugging Face Datasets](https://huggingface.co/docs/datasets/en/index) library.
 
@@ -33,15 +33,15 @@ It is as easy as:
 from datasets import load_dataset
 import polars as pl
 
-# This line will download 6.6GB+ of all RFSD data and store it in a 🤗 cache folder
+# This line will download 6.6 GB+ of all RFSD data and store it in a 🤗 cache folder
 RFSD = load_dataset('irlspbru/RFSD')
 
-# Alternatively, this will download ~540MB with all financial statements for 2023
-# to a Polars DataFrame (requires about 8GB of RAM)
+# Alternatively, this will download ~540 MB with all financial statements for 2023
+# to a Polars DataFrame (requires about 8 GB of RAM)
 RFSD_2023 = pl.read_parquet('hf://datasets/irlspbru/RFSD/RFSD/year=2023/*.parquet')
 ```
 
-We provide a file in `aux/descriptive_names_dict.csv` which can be used to change the original names of financial variables to user-friendly ones, e.g. `B_revenue` and `CFo_materials` in lieu of `line_2110` and `line_4121`, respectively. Prefixes are for disambiguation purposes: `B_` stands for balance sheet variables, `PL_` — profit and loss statement, `CFi_` and `CFo` — cash inflows and cash outflows, etc. (One can find all the variable definitions in the supplementary materials table in the accompanying paper and [consult](https://www.consultant.ru/document/cons_doc_LAW_32453/) the original statement forms used by firms: full is `KND 0710099`, simplified — `KND 0710096`.)
+We provide a file in `aux/descriptive_names_dict.csv` which can be used to change the original names of financial variables to user-friendly ones, e.g., `B_revenue` and `CFo_materials` in lieu of `line_2110` and `line_4121`, respectively. Prefixes are for disambiguation purposes: `B_` stands for balance sheet variables, `PL_` — profit and loss statement, `CFi_` and `CFo` — cash inflows and cash outflows, etc. (One can find all the variable definitions in the supplementary materials table in the accompanying paper and [consult](https://www.consultant.ru/document/cons_doc_LAW_32453/) the original statement forms used by firms: full is `KND 0710099`, simplified — `KND 0710096`.)
 
 ``` Python
 # Give suggested descriptive names to variables
@@ -49,7 +49,7 @@ renaming_df = pl.read_csv('https://raw.githubusercontent.com/irlcode/RFSD/main/a
 RFSD = RFSD.rename({item[0]: item[1] for item in zip(renaming_df['original'], renaming_df['descriptive'])})
 ```
 
-Please note that the data is not shuffled within year, meaning that streaming first __n__ rows will not yield a random sample. 
+Please note that the data is not shuffled within year, meaning that streaming the first __n__ rows will not yield a random sample. 
 
 #### Local File Import
 
@@ -135,7 +135,7 @@ To the best of our knowledge, the RFSD is the only open data set with up-to-date
 
 #### What is the data period?
 
-We provide financials for Russian firms in 2011-2023. We will add the data for 2024 by July, 2025 (see Version and Update Policy below).
+We provide financials for Russian firms in 2011-2024. We will add the data for 2025 by July, 2026 (see Version and Update Policy below).
 
 #### Why are there no data for firm X in year Y?
 
@@ -153,11 +153,11 @@ We use Nominatim to geocode structured addresses of incorporation of legal entit
 
 #### Why is the data for firm X different from https://bo.nalog.ru/?
 
-Many firms submit correcting statements after the initial filing. While we have downloaded the data way past the April, 2024 deadline for 2023 filings, firms may have kept submitting the correcting statements. We will capture them in the future releases.
+Many firms submit correcting statements after the initial filing. While we have downloaded the data way past the April 1, 2025 deadline for 2024 filings, firms may have kept submitting the correcting statements. We will capture them in the future releases.
 
 #### Why is the data for firm X unrealistic?
 
-We provide the source data as is, with minimal changes. Consider a relatively unknown [LLC Banknota](https://bo.nalog.ru/organizations-card/12204655). It reported 3.7 trillion rubles in revenue in 2023, or 2% of Russia's GDP. This is obviously an outlier firm with unrealistic financials. We manually reviewed the data and flagged such firms for user consideration (variable `outlier`), keeping the source data intact.
+We provide the source data as is, with minimal changes. Consider a relatively unknown [LLC Banknota](https://bo.nalog.ru/organizations-card/12204655). It reported 3.7 trillion rubles in revenue in 2023, or 2% of Russia's GDP. This is obviously an outlier firm with unrealistic financials. We have manually reviewed the data and flagged such firms for user consideration (variable `outlier`), keeping the source data intact.
 
 #### Why is the data for groups of companies different from their IFRS statements?
 
@@ -167,8 +167,8 @@ We should stress that we provide unconsolidated financial statements filed accor
 
 The data is provided in Apache Parquet format. This is a structured, column-oriented, compressed binary format allowing for conditional subsetting of columns and rows. In other words, you can easily query financials of companies of interest, keeping only variables of interest in memory, greatly reducing data footprint.
 
-## Dataset Construction
-The below figure explains how we constructed the dataset. An annotated `Makefile` documents the process (with `renv` taking care of creating virtual R environment with packages required for this project). Please be aware that in order to replicate it one has to have an access to the [fee-based API](https://bo.nalog.ru) of the Federal Tax Service of the Russian Federation, and also be in possession of the panels of all active organizations and their classification code, and geocoded addresses. We built them outside of this project from the official sources — the [Uniform State Register of Legal Entities](http://egrul.nalog.ru) (EGRUL) and Rosstat's [Statistical Register of Economic Entities](https://rosstat.gov.ru/opendata/7708234640-urid1) — and do not provide here.
+## Data set Construction
+The below figure explains how we constructed the data set. An annotated `Makefile` documents the process (with `renv` taking care of creating virtual R environment with packages required for this project). Please be aware that in order to replicate it one has to have an access to the [fee-based API](https://bo.nalog.ru) of the Federal Tax Service of the Russian Federation, and also be in possession of the panels of all active organizations and their classification code, and geocoded addresses. We built them outside of this project from the official sources — the [Uniform State Register of Legal Entities](http://egrul.nalog.ru) (EGRUL) and Rosstat's [Statistical Register of Economic Entities](https://rosstat.gov.ru/opendata/7708234640-urid1) — and do not provide here.
 <br>
 <div align="center">
     <img src="figures/dataset_construction.png" alt="Schematic overview of the dataset construction process" />
@@ -178,15 +178,10 @@ The below figure explains how we constructed the dataset. An annotated `Makefile
 
 ## Repository Structure
 ```
-.
 ├── aux
 │   └── descriptive_names_dict.csv
 ├── code
 │   ├── 1_financials
-│   │   ├── helpers
-│   │   │   ├── check_articulation_functions.R
-│   │   │   ├── lines_tags_dict.R
-│   │   │   └── parsing_functions.R
 │   │   ├── 1a_collect_rosstat_data.R
 │   │   ├── 1b_build_rosstat_panel.R
 │   │   ├── 2a_collect_fns_xmls_ids.R
@@ -196,30 +191,59 @@ The below figure explains how we constructed the dataset. An annotated `Makefile
 │   │   ├── 3_build_filing_panel.R
 │   │   ├── 4_combine_rosstat_fns_panels.R
 │   │   ├── 5_build_articulation_panel.R
-│   │   └── 6_adjust_values.R
+│   │   ├── 6_adjust_values.R
+│   │   └── helpers
+│   │       ├── check_articulation_functions.R
+│   │       ├── lines_tags_dict.R
+│   │       └── parsing_functions.R
+│   └── 2_geocoding
+│       ├── 1_set_up_nominatim_server.sh
+│       ├── 2_export_addresses.r
+│       ├── 3_query_nominatim.r
+│       ├── 4_create_final_mapping.r
+│       └── 5_join_results_to_financials.R
+├── use_cases
+│   ├── external_data
+│   │   └── VVP_god_s_1995-2024.xlsx
+│   ├── interest_payments.md
+│   ├── interest_payments.Rmd
+│   ├── spatialization.md
+│   ├── spatialization.Rmd
+│   ├── tfp.md
+│   └── tfp.Rmd
 ├── figures
 │   ├── dataset_construction.png
-│   └── filing_by_month.png
+│   ├── filing_by_month.png
+│   ├── interest_figure2-1.png
+│   ├── interest_figure3-1.png
+│   ├── interest_figure3alt-1.png
+│   ├── kommersant_logo_upscaled.png
+│   ├── kz_table_1.png
+│   ├── mogilyat_figure2.png
+│   ├── mogilyat_figure3.png
+│   ├── rbc_logo_upscaled.png
+│   ├── spatialization_gardenring-1.png
+│   ├── spatialization_moscow-1.png
+│   ├── spatialization_moscowkummu-1.png
+│   ├── spatialization_spb-1.png
+│   ├── spatialization_spbcentre-1.png
+│   ├── whats_new_2.0.0_filing.png
+│   └── whats_new_2.0.0_geocoding.png
 ├── renv
-│   ├── library
-│   ├── activate.R
-│   └── settings.json
-├── use_cases
-│   ├── interest_payments.Rmd
-│   ├── spatialization.Rmd
-│   └── tfp.Rmd
+│   └── activate.R
+├── renv.lock
 ├── AUTHORS
+├── CITATION.cff
 ├── LICENCE
 ├── Makefile
-├── README.md
-└── renv.lock
+└── README.md
+
 ```
 ## Version and Update Policy
 
-Version (SemVer): `1.0.1`.
+Version (SemVer): `2.0.0`.
 
-
-We intend to update the RFSD annualy as the data becomes available, in other words when most of the firms have their statements filed with the Federal Tax Service. The official deadline for filing of previous year statements is April, 1. However, every year a portion of firms either fails to meet the deadline or submits corrections afterwards. As the figure below shows, filing continues up to the very end of the year but after the end of April this stream quickly thins out. Nevertheless, there is obviously a trade-off between minimization of data completeness and version availability. We find it a reasonable compromise to query new data in early June, since on average by the end of May 96.7% statements are already filed, including 86.4% of all the correcting filings. We plan to make a new version of RFSD available by July, 2025.
+We intend to update the RFSD annualy as the data becomes available, in other words when most of the firms have their statements filed with the Federal Tax Service. The official deadline for filing of previous year statements is April, 1. However, every year a portion of firms either fails to meet the deadline or submits corrections afterwards. As the figure below shows, filing continues up to the very end of the year but after the end of April this stream quickly thins out. Nevertheless, there is obviously a trade-off between minimization of data completeness and version availability. We find it a reasonable compromise to query new data in early June, since on average by the end of May 96.7% statements are already filed, including 86.4% of all the correcting filings. We plan to update RFSD annualy in late July — early August.
 
 <div align="center" width="60%">
     <img src="figures/filing_by_month.png" alt="Line plot of number of filing by month" />
@@ -230,6 +254,36 @@ We intend to update the RFSD annualy as the data becomes available, in other wor
 
 All notable changes to this project will be documented below. The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [2.0.0] - 2025-08-19
+
+### Added
+- Financial statements for 2024 have been added, totaling approximately 2.25 million observations.
+- More than 315,000 new statements (as well as 55,000 new non-statements by eligible firms) for 2011–2023 have also been included:
+    - More than 24,000 statements for 2023 were imputed using the 2024 filings.
+    - Approximately 3,400 statements were either added to GIR BO retrospectively or missing in v1.0.1 due to the absence of the corresponding organizations in the EGRUL. When we updated the EGRUL, we were able to reconstruct those filings.
+    - The remaining 286,000+ statements are the ones that we had previously imputed from firms' future statements but erroneously dropped due to a bug (see Fixed).
+
+### Fixed
+- Resolved a bug in the final filtering of the panel. We removed all non-eligible non-filers, as intended, but inadvertently excluded observations of non-eligible non-filers whose statements we were able to reconstruct from the following-year filings. Fixing this filter returned about 286,000 statements to the panel.
+
+### Changed
+- The `region_taxcode` now reflects a firm's region of incorporation. Earlier it was simply derived from the first two digits of the firm tax identifier (`inn`) and did not account for reincorporations. The format has been extended from 2 to 4 digits, allowing for differentiation between Arkhangelskaya oblast (`"2900"`) and Nenetskiy AO (`"2983"`), which the former includes.
+- We have revised the statements of all firms previously marked as `outlier` and set the flag to 0 where anomalous revenue has been corrected in the GIR BO database retrospectively.
+- The outlier detection procedure has been updated. Before, we manually reviewed top-20 firms in terms of revenue or total assets within each 2-digit industry (excluding financial firms). Now, we conduct the outlierness review of 2024 filings at OKVED section level, manually examining the top-30 firms by revenue within each OKVED section.
+- The `filed` flag for observed but all-zero statements (all fields, even Equity, are 0) statements is now set to 0 as it is clearly erroneous. The change this brings is reported below:
+<div align="center" width="60%">
+    <img src="figures/whats_new_2.0.0_filing.png" alt="Line plot of number of eligible firms, filed and imputed statements by year" />
+</div>
+<br>
+
+- The `exemption_criteria` for eligible organizations is now set to `"none"` (previously `NA`).
+- Enhanced geocoding quality (see [#1](http://github.com/irlcode/RFSD/issues/1)): improvements in address pre-processing procedure have enabled us to upgrade geocoding quality from the city level to the street level for firms accounting for ~8% of revenue from 2022 onwards:
+
+<div align="center" width="60%">
+    <img src="figures/whats_new_2.0.0_geocoding.png" alt="Line plots of 1) number of firms grouped by geocoding quality, 2) share of profit generated by firms in geocoding quality groups" />
+</div>
+<br>
+
 ## [1.0.1] - 2025-05-13
 
 ### Fixed
@@ -237,7 +291,7 @@ All notable changes to this project will be documented below. The format is base
 - Fixed a bug in summation of negative lines when calculating line 2400 (net profit). The bug was identified in [#7](http://github.com/irlcode/RFSD/issues/7) and the fix is explained in [#8](http://github.com/irlcode/RFSD/issues/8).
 - Fixed a bug in adjustment of line 1300 (total capital and reserves) and 2500 (result of the period). See [#9](http://github.com/irlcode/RFSD/issues/9) for an explanation.
 
-The updated lines 2400 are quite different from the original values. The value of line 2400 changed in 6-11% of observations in 2011-2018 and in about 25% observations in 2019-2023, the summed difference in the original and new values ranges from 5% to 110% depending on year. The fix for sign inconsistency implies revising scripts for all calculations where negative-only, those ()-ed in statement forms, variables were used.
+The updated lines 2400 are quite different from the original values. The value of line 2400 changed in 6–11% of observations in 2011-2018 and in about 25% observations in 2019–2023, the summed difference in the original and new values ranges from 5% to 110% depending on year. The fix for sign inconsistency implies revising scripts for all calculations where negative-only, those ()-ed in statement forms, variables were used.
 
 ## ToDo and Known Deficiencies
 Below is our To-Do list, we will be grateful for any contributions you can make. If you spot a bug, just raise it as a GitHub issue.

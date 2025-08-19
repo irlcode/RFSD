@@ -53,34 +53,34 @@ Next, we engage in filtering, trying to mimic MMPTT filtering logic as close as 
 ```{r filtering}
 # Only non-financial firms
 financials <- financials[okved_section != "K"]
-uniqueN(financials$inn) # 4967290
+uniqueN(financials$inn) # 4995763
 
 ## Only firms filing statements or where we could reconstruct
 ## it from previous year data
 cbr_sample <- financials[filed == 1 | imputed == 1]
-uniqueN(cbr_sample$inn) # 3181727
+uniqueN(cbr_sample$inn) # 3219916
 
 ## Remove firms where at least one of variables is missing
 cbr_sample <- cbr_sample[!is.na(revenue) & !is.na(costofgoodssold) & !is.na(salesprofit) & !is.na(grossprofit) ]
-uniqueN(cbr_sample$inn) # 2262553
+uniqueN(cbr_sample$inn) # 2266981
 
 ## Remove firms with zero revenue or cost of goods sold
 cbr_sample <- cbr_sample[revenue != 0 & costofgoodssold != 0]
-uniqueN(cbr_sample$inn) # 2175409
+uniqueN(cbr_sample$inn) # 2179424
 
 ## Remove firms where assets do not match liablities and equity
 cbr_sample <- cbr_sample[ assets == liabilities_equity ]
-uniqueN(cbr_sample$inn) # 2172179
+uniqueN(cbr_sample$inn) # 2176181
 
 ## Remove firms without interest payments
 cbr_sample <- cbr_sample[interestpayable != 0 & !is.na(interestpayable)]
-uniqueN(cbr_sample$inn) # 372306
+uniqueN(cbr_sample$inn) # 372717
 
 ## Remove outlier firms in terms of interestpayable to costofgoodssold ratio
 cbr_sample[, interest_cost_ratio := interestpayable/costofgoodssold]
 trim_cutoffs <- quantile(cbr_sample$interest_cost_ratio, c(0.015, 0.985))
 cbr_sample <- cbr_sample[ interest_cost_ratio >= trim_cutoffs[1] & interest_cost_ratio <= trim_cutoffs[2]]
-uniqueN(cbr_sample$inn) # 364847
+uniqueN(cbr_sample$inn) # 365253
 
 ```
 

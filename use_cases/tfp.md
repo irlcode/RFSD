@@ -68,7 +68,8 @@ Note that here we import only a handful of variables necessary for this
 project and the years of interest:
 
 ``` r
-RFSD <- open_dataset("local/path/to/RFSD")
+# RFSD <- open_dataset("local/path/to/RFSD")
+RFSD <- open_dataset("/data1/RFSD")
 scan_builder <- RFSD$NewScan()
 scan_builder$Filter(Expression$field_ref("year") >= 2011 & Expression$field_ref("year") <= 2018)
 ```
@@ -87,9 +88,9 @@ financials <- as.data.table(scanner$ToTable())
 gc()
 ```
 
-    ##             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells  18913574 1010.1   39591448 2114.5  18920479 1010.5
-    ## Vcells 514032305 3921.8 1181186662 9011.8 982604296 7496.7
+    ##             used   (Mb) gc trigger   (Mb)   max used   (Mb)
+    ## Ncells  19004033 1015.0   39849472 2128.2   19010893 1015.3
+    ## Vcells 544748929 4156.2 1244619827 9495.7 1212099398 9247.6
 
 ``` r
 # Rename variables
@@ -111,18 +112,18 @@ close as possible.
 ## Only eligible firms filing statements or where we could reconstruct
 ## it from previous year data
 financials <- financials[eligible == 1 & (filed == 1 | imputed == 1)]
-uniqueN(financials$inn) # 3976319
+uniqueN(financials$inn) # 3789872
 ```
 
-    ## [1] 3976319
+    ## [1] 3789872
 
 ``` r
 ## Only firms in manufacturing
 financials <- financials[okved_section == "C"]
-uniqueN(financials$inn) # 336992
+uniqueN(financials$inn) # 328705
 ```
 
-    ## [1] 336992
+    ## [1] 328705
 
 # Deflation
 
@@ -212,18 +213,18 @@ uniqueN(financials$inn) # 28590
 financials[, obs_per_firm := .N, by = "inn"]
 financials[, obs_per_firm_expected := max(year) - min(year) + 1, by = c("inn") ]
 financials <- financials[obs_per_firm_expected == obs_per_firm]
-uniqueN(financials$inn) # 24259
+uniqueN(financials$inn) # 24257
 ```
 
-    ## [1] 24260
+    ## [1] 24257
 
 ``` r
 ## Only firms active for more than 1 year
 financials <- financials[ obs_per_firm > 1]
-uniqueN(financials$inn) # 15121
+uniqueN(financials$inn) # 15119
 ```
 
-    ## [1] 15122
+    ## [1] 15119
 
 ``` r
 financials[, c("obs_per_firm", "obs_per_firm_expected") := NULL]

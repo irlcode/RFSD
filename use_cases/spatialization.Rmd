@@ -70,11 +70,11 @@ financials[revenue > 0 & materials > 0 & (revenue - materials) > 0, va := revenu
 
 # Remove firms with negative value added
 financials <- financials[va >  0]
-uniqueN(financials$inn) # 136429 firms
+uniqueN(financials$inn) # 137805 firms
 
 # Remove firms with low geocoding quality
 financials <- financials[geocoding_quality %in% c("house", "street")]
-uniqueN(financials$inn) # 122616 firms
+uniqueN(financials$inn) # 122822 firms
 ```
 
 # Aggregation
