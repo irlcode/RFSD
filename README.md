@@ -257,10 +257,10 @@ All notable changes to this project will be documented below. The format is base
 ## [2.0.1] - 2025-08-19
 
 ### Fixed
-- Resolved a bug in the region variable value labels.
+- Resolved a bug in the `region` variable value labels.
 
 ### Changed
-- Removed zero variable marking all-zero financial statements.
+- Removed `zero` variable marking all-zero financial statements.
 
 ## [2.0.0] - 2025-08-19
 
