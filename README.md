@@ -241,7 +241,7 @@ The below figure explains how we constructed the data set. An annotated `Makefil
 ```
 ## Version and Update Policy
 
-Version (SemVer): `2.0.0`.
+Version (SemVer): `2.0.1`.
 
 We intend to update the RFSD annualy as the data becomes available, in other words when most of the firms have their statements filed with the Federal Tax Service. The official deadline for filing of previous year statements is April, 1. However, every year a portion of firms either fails to meet the deadline or submits corrections afterwards. As the figure below shows, filing continues up to the very end of the year but after the end of April this stream quickly thins out. Nevertheless, there is obviously a trade-off between minimization of data completeness and version availability. We find it a reasonable compromise to query new data in early June, since on average by the end of May 96.7% statements are already filed, including 86.4% of all the correcting filings. We plan to update RFSD annualy in late July — early August.
 
@@ -253,6 +253,14 @@ We intend to update the RFSD annualy as the data becomes available, in other wor
 ## Changelog
 
 All notable changes to this project will be documented below. The format is based on [Keep a Changelog](http://keepachangelog.com/).
+
+## [2.0.1] - 2025-08-19
+
+### Fixed
+- Resolved a bug in the region variable value labels.
+
+### Changed
+- Removed zero variable marking all-zero financial statements.
 
 ## [2.0.0] - 2025-08-19
 
