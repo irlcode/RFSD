@@ -135,7 +135,7 @@ To the best of our knowledge, the RFSD is the only open data set with up-to-date
 
 #### What is the data period?
 
-We provide financials for Russian firms in 2011-2023. We will add the data for 2024 by July, 2025 (see Version and Update Policy below).
+We provide financials for Russian firms in 2011-2024. We will add the data for 2025 by July, 2026 (see Version and Update Policy below).
 
 #### Why are there no data for firm X in year Y?
 
@@ -153,7 +153,7 @@ We use Nominatim to geocode structured addresses of incorporation of legal entit
 
 #### Why is the data for firm X different from https://bo.nalog.ru/?
 
-Many firms submit correcting statements after the initial filing. While we have downloaded the data way past the April 1, 2024 deadline for 2023 filings, firms may have kept submitting the correcting statements. We will capture them in the future releases.
+Many firms submit correcting statements after the initial filing. While we have downloaded the data way past the April 1, 2025 deadline for 2024 filings, firms may have kept submitting the correcting statements. We will capture them in the future releases.
 
 #### Why is the data for firm X unrealistic?
 
@@ -270,7 +270,7 @@ All notable changes to this project will be documented below. The format is base
 - The `region_taxcode` now reflects a firm's region of incorporation. Earlier it was simply derived from the first two digits of the firm tax identifier (`inn`) and did not account for reincorporations. The format has been extended from 2 to 4 digits, allowing for differentiation between Arkhangelskaya oblast (`"2900"`) and Nenetskiy AO (`"2983"`), which the former includes.
 - We have revised the statements of all firms previously marked as `outlier` and set the flag to 0 where anomalous revenue has been corrected in the GIR BO database retrospectively.
 - The outlier detection procedure has been updated. Before, we manually reviewed top-20 firms in terms of revenue or total assets within each 2-digit industry (excluding financial firms). Now, we conduct the outlierness review of 2024 filings at OKVED section level, manually examining the top-30 firms by revenue within each OKVED section.
-- The `filed` flag for observed but all-zero statements (all fields, even Equity, is 0) statements is now set to 0 as it is clearly erroneous. The change this brings is reported below:
+- The `filed` flag for observed but all-zero statements (all fields, even Equity, are 0) statements is now set to 0 as it is clearly erroneous. The change this brings is reported below:
 <div align="center" width="60%">
     <img src="figures/whats_new_2.0.0_filing.png" alt="Line plot of number of eligible firms, filed and imputed statements by year" />
 </div>
