@@ -269,7 +269,7 @@ All notable changes to this project will be documented below. The format is base
 ### Changed
 - The `region_taxcode` now reflects a firm's region of incorporation. Earlier it was simply derived from the first two digits of the firm tax identifier (`inn`) and did not account for reincorporations. The format has been extended from 2 to 4 digits, allowing for differentiation between Arkhangelskaya oblast (`"2900"`) and Nenetskiy AO (`"2983"`), which the former includes.
 - We have revised the statements of all firms previously marked as `outlier` and set the flag to 0 where anomalous revenue has been corrected in the GIR BO database retrospectively.
-- The outlier detection procedure has been updated. Before, we manually reviewed top-20 firms in terms of revenue or total assets within each 2-digit industry (excluding financial firms). Now, we conduct the outlierness review of 2024 filings at OKVED section level, manually examining the top-30 firms by revenue within each OKVED section/
+- The outlier detection procedure has been updated. Before, we manually reviewed top-20 firms in terms of revenue or total assets within each 2-digit industry (excluding financial firms). Now, we conduct the outlierness review of 2024 filings at OKVED section level, manually examining the top-30 firms by revenue within each OKVED section.
 - The `filed` flag for observed but all-zero statements (all fields, even Equity, is 0) statements is now set to 0 as it is clearly erroneous. The change this brings is reported below:
 <div align="center" width="60%">
     <img src="figures/whats_new_2.0.0_filing.png" alt="Line plot of number of eligible firms, filed and imputed statements by year" />
