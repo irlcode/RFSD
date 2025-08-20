@@ -366,7 +366,7 @@ provide 5 explanations for the apparent failure to replicate KZ exactly:
   (Loss) for Period + Cost of Employees + Depreciation + Interest
   payable. KZ write that they define value added simply as revenue minus
   materials and we follow this logic in our replication. However, we
-  cannot rule our a possibility of additional steps KZ may have taken
+  cannot rule out a possibility of additional steps KZ may have taken
   when constructing their value added variable which we cannot replicate
   as they may be undocumented.
 
