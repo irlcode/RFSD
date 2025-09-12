@@ -241,7 +241,7 @@ The below figure explains how we constructed the data set. An annotated `Makefil
 ```
 ## Version and Update Policy
 
-Version (SemVer): `2.0.2`.
+Version (SemVer): `2.0.3`.
 
 We intend to update the RFSD annualy as the data becomes available, in other words when most of the firms have their statements filed with the Federal Tax Service. The official deadline for filing of previous year statements is April, 1. However, every year a portion of firms either fails to meet the deadline or submits corrections afterwards. As the figure below shows, filing continues up to the very end of the year but after the end of April this stream quickly thins out. Nevertheless, there is obviously a trade-off between minimization of data completeness and version availability. We find it a reasonable compromise to query new data in early June, since on average by the end of May 96.7% statements are already filed, including 86.4% of all the correcting filings. We plan to update RFSD annualy in late July — early August.
 
@@ -253,6 +253,15 @@ We intend to update the RFSD annualy as the data becomes available, in other wor
 ## Changelog
 
 All notable changes to this project will be documented below. The format is based on [Keep a Changelog](http://keepachangelog.com/).
+
+## [2.0.3] - 2025-09-12
+
+### Fixed
+- Added previously missing `okopf`, `okfc`, and `okpo` values for new firms entering in 2024.
+
+### Changed
+- Improved `okopf` completeness: previously the data on this classification code came only from the Rosstat's [Statistical Register of Economic Entities](https://rosstat.gov.ru/opendata/7708234640-urid1) whereas now it is sourced from the Federal Tax Service's EGRUL and GIR BO filings (with EGRUL taking precedence). As a result, we were able to fill missing `okopf` for <1% of firms, futher slightly improving `eligible` classification.
+- Impovements in eligibility classification prompted by reduction `okopf` missingness allowed us to removed about 7 thousand  non-filing organisations from the data. Now that we had their `okopf` we could confidently classify them as non-eligible non-filers (they had had missing `okopf` before and were treated as eligible non-filers to be on the safe side). Those organisations are primarily government or municipal agencies or religious entities that are not required to file their financial statements.
 
 ## [2.0.2] - 2025-09-04
 
