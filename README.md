@@ -261,7 +261,7 @@ All notable changes to this project will be documented below. The format is base
 
 ### Changed
 - Improved `okopf` completeness: previously the data on this classification code came only from the Rosstat's [Statistical Register of Economic Entities](https://rosstat.gov.ru/opendata/7708234640-urid1) whereas now it is sourced from the Federal Tax Service's EGRUL and GIR BO filings (with EGRUL taking precedence). As a result, we were able to fill missing `okopf` for <1% of firms, futher slightly improving `eligible` classification.
-- Impovements in eligibility classification prompted by reduction `okopf` missingness allowed us to removed about 7 thousand  non-filing organisations from the data. Now that we had their `okopf` we could confidently classify them as non-eligible non-filers (they had had missing `okopf` before and were treated as eligible non-filers to be on the safe side). Those organisations are primarily government or municipal agencies or religious entities that are not required to file their financial statements.
+- Impovements in eligibility classification prompted by reduction `okopf` missingness allowed us to remove about 7 thousand  non-filing organisations from the data. Now that we had their `okopf` we could confidently classify them as non-eligible non-filers (they had had missing `okopf` before and were treated as eligible non-filers to be on the safe side). Those organisations are primarily government or municipal agencies or religious entities that are not required to file their financial statements.
 
 ## [2.0.2] - 2025-09-04
 
