@@ -41,11 +41,11 @@ RFSD = load_dataset('irlspbru/RFSD')
 RFSD_2023 = pl.read_parquet('hf://datasets/irlspbru/RFSD/RFSD/year=2023/*.parquet')
 ```
 
-We provide a file in `aux/descriptive_names_dict.csv` which can be used to change the original names of financial variables to user-friendly ones, e.g., `B_revenue` and `CFo_materials` in lieu of `line_2110` and `line_4121`, respectively. Prefixes are for disambiguation purposes: `B_` stands for balance sheet variables, `PL_` — profit and loss statement, `CFi_` and `CFo` — cash inflows and cash outflows, etc. (One can find all the variable definitions in the supplementary materials table in the accompanying paper and [consult](https://www.consultant.ru/document/cons_doc_LAW_32453/) the original statement forms used by firms: full is `KND 0710099`, simplified — `KND 0710096`.)
+We provide a file in `aux_data/descriptive_names_dict.csv` which can be used to change the original names of financial variables to user-friendly ones, e.g., `B_revenue` and `CFo_materials` in lieu of `line_2110` and `line_4121`, respectively. Prefixes are for disambiguation purposes: `B_` stands for balance sheet variables, `PL_` — profit and loss statement, `CFi_` and `CFo` — cash inflows and cash outflows, etc. (One can find all the variable definitions in the supplementary materials table in the accompanying paper and [consult](https://www.consultant.ru/document/cons_doc_LAW_32453/) the original statement forms used by firms: full is `KND 0710099`, simplified — `KND 0710096`.)
 
 ``` Python
 # Give suggested descriptive names to variables
-renaming_df = pl.read_csv('https://raw.githubusercontent.com/irlcode/RFSD/main/aux/descriptive_names_dict.csv')
+renaming_df = pl.read_csv('https://raw.githubusercontent.com/irlcode/RFSD/main/aux_data/descriptive_names_dict.csv')
 RFSD = RFSD.rename({item[0]: item[1] for item in zip(renaming_df['original'], renaming_df['descriptive'])})
 ```
 
@@ -178,7 +178,7 @@ The below figure explains how we constructed the data set. An annotated `Makefil
 
 ## Repository Structure
 ```
-├── aux
+├── aux_data
 │   └── descriptive_names_dict.csv
 ├── code
 │   ├── 1_financials
