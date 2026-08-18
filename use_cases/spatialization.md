@@ -24,7 +24,7 @@ Although well accepted in the literature (see
 \[[6](https://doi.org/10.1038/sdata.2018.4),
 [7](https://doi.org/10.1038/s41597-022-01322-5)\] as the most widely
 used data sources), these GDP spatializations may suffer from
-measurement errors in night lights (e.g. upward bias introduced by gas
+measurement errors in night lights (e.g. upward bias introduced by gas
 flaring, data omissions due to cloud cover, auroras in high latitudes),
 misclassified land use types, and can only be trusted only if inference
 is conducted in a responsible way (no data leakage, spatial
@@ -46,79 +46,19 @@ of GDP.
 ``` r
 library(data.table)
 library(arrow)
-```
-
-    ## 
-    ## Attaching package: 'arrow'
-
-    ## The following object is masked from 'package:utils':
-    ## 
-    ##     timestamp
-
-``` r
 library(knitr)
 library(stringi)
 library(stringr)
 library(sf)
-```
-
-    ## Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE
-
-``` r
 library(terra)
-```
-
-    ## terra 1.8.50
-
-    ## 
-    ## Attaching package: 'terra'
-
-    ## The following object is masked from 'package:knitr':
-    ## 
-    ##     spin
-
-    ## The following object is masked from 'package:arrow':
-    ## 
-    ##     buffer
-
-    ## The following object is masked from 'package:data.table':
-    ## 
-    ##     shift
-
-``` r
 library(ggplot2)
 library(scales)
-```
-
-    ## 
-    ## Attaching package: 'scales'
-
-    ## The following object is masked from 'package:terra':
-    ## 
-    ##     rescale
-
-``` r
 library(tidyterra)
-```
-
-    ## 
-    ## Attaching package: 'tidyterra'
-
-    ## The following object is masked from 'package:stats':
-    ## 
-    ##     filter
-
-``` r
 library(ggthemes)
 library(RColorBrewer)
 library(rgeoboundaries)
 library(rmapshaper)
 library(egg)
-```
-
-    ## Loading required package: gridExtra
-
-``` r
 library(h3jsr)
 library(maptiles)
 
@@ -130,22 +70,30 @@ knitr::opts_chunk$set(dpi=300,fig.width=7)
 Note that here we import only a handful of variables necessary and one
 year of interest — 2015. We chose this year to allow comparisons with
 alternative GDP spatializations, in particular, Kummu et
-al. \[[6](https://doi.org/10.1038/sdata.2018.4)\], which are only
+al. \[[6](https://doi.org/10.1038/sdata.2018.4)\], which are only
 available at a fine level of detail for this year.
 
 ``` r
 RFSD <- open_dataset("local/path/to/RFSD")
 scan_builder <- RFSD$NewScan()
 scan_builder$Filter(Expression$field_ref("year") == 2015)
+```
+
+``` r
 scan_builder$Project(cols = c("inn", "ogrn", "region", "year", "eligible", "filed", "imputed", "financial", "outlier", "line_2110", "line_4121", "geocoding_quality", "lon", "lat"))
+```
+
+``` r
 scanner <- scan_builder$Finish()
 financials <- as.data.table(scanner$ToTable())
 gc()
+```
 
+``` r
 # Rename variables
 setnames(financials, c("line_2110", "line_4121"),
-						c("revenue", "materials"),
-						skip_absent = T)
+                     c("revenue", "materials"),
+        skip_absent = T)
 
 # Reverse sign for negative-only variables
 financials[, materials := -materials]
@@ -153,7 +101,7 @@ financials[, materials := -materials]
 
 # Filtering
 
-Next, we engage in filtering, keeping only non-financial firms (i.e. no
+Next, we engage in filtering, keeping only non-financial firms (i.e. no
 banks, insurers, or brokers) filing non-anomalous statements. Since GDP
 is the sum of value added across industries, we also calculate the value
 added of each firm, defined simply as revenue minus materials.
@@ -168,18 +116,14 @@ financials[revenue > 0 & materials > 0 & (revenue - materials) > 0, va := revenu
 
 # Remove firms with negative value added
 financials <- financials[va >  0]
-uniqueN(financials$inn) # 137805 firms
+uniqueN(financials$inn) # 137794 firms
 ```
-
-    ## [1] 137805
 
 ``` r
 # Remove firms with low geocoding quality
 financials <- financials[geocoding_quality %in% c("house", "street")]
-uniqueN(financials$inn) # 122822 firms
+uniqueN(financials$inn) # 122443 firms
 ```
-
-    ## [1] 122822
 
 # Aggregation
 
@@ -201,8 +145,6 @@ However, aggregation can be done at any resolution.
 # Map to H3 address space at given resolution
 financials[, h3_address := point_to_cell(financials[, c("lon", "lat")], res = 10)]
 ```
-
-    ## Assuming columns 1 and 2 contain x, y coordinates in EPSG:4326
 
 ``` r
 # Total value added per H3 address
@@ -338,9 +280,9 @@ arcseconds (~1 km × 1 km at equator) at best
 \[[6](https://doi.org/10.1038/sdata.2018.4),
 [7](https://doi.org/10.1038/s41597-022-01322-5)\]. Here we will visually
 assess the benefit of the fine grid provided by the RFSD by juxtaposing
-Kummu et al. \[[6](https://doi.org/10.1038/sdata.2018.4)\]
+Kummu et al. \[[6](https://doi.org/10.1038/sdata.2018.4)\]
 spatialization with our spatialization. We will obtain the raster data
-from Kummu et al. for 2015 from
+from Kummu et al. for 2015 from
 [Dryad](https://doi.org/10.5061/dryad.dk1j0) (February 13, 2020
 version), cut it to Russia’s extent, and convert to 2015 Rubles, as the
 RFSD data.
@@ -359,7 +301,9 @@ kummu_2015_1km <- rast("local/path/to/kummu_et_al_2018/GDP_PPP_30arcsec_v3.nc", 
 
 # Cut to Russia's extent
 kummu_2015_1km <- crop(kummu_2015_1km, ext(vect(russia_boundary)))
+```
 
+``` r
 # To the same units
 ## 2011 Geary–Khamis dollars to billions of 2015 US dollars
 ## https://www.imf.org/external/datamapper/PPPEX@WEO/OEMDC/ADVEC/WEOWORLD/DA/IND
@@ -368,12 +312,16 @@ international_dollar_rub_2011_exchange_rate <- 18.41
 
 ### From 2011 international dollar to 2011 RUB
 kummu_2015_1km <- kummu_2015_1km*international_dollar_rub_2011_exchange_rate
+```
 
+``` r
 ### From 2011 RUB to 2015 RUB accounting for inflation
 ## https://www.statbureau.org/en/russia/inflation-calculators?dateBack=2011-1-1&dateTo=2015-12-1&amount=1000
 rub_2011_2015_price_change <- 1.5135
 kummu_2015_1km <- kummu_2015_1km*rub_2011_2015_price_change
+```
 
+``` r
 ### To thousands of rubles, as the RFSD
 kummu_2015_1km <- kummu_2015_1km/1000
 ```
@@ -411,10 +359,10 @@ plot(viz)
 
 ![](../figures/spatialization_moscowkummu-1.png)<!-- -->
 
-A 1 km grid from the Kummu et al. spatialisation contains about 28
+A 1 km grid from the Kummu et al. spatialisation contains about 28
 hexagons from the RFSD spatialisation at resolution 10. This means that
 the H3 spatial indexing system at resolution 10 provides about 28 times
-more data than the Kummu et al. spatialisation. We can bring even more
+more data than the Kummu et al. spatialisation. We can bring even more
 data to the table by increasing the H3 resolution for street-level or
 even house-level analysis.
 
