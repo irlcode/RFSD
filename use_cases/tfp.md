@@ -68,8 +68,7 @@ Note that here we import only a handful of variables necessary for this
 project and the years of interest:
 
 ``` r
-# RFSD <- open_dataset("local/path/to/RFSD")
-RFSD <- open_dataset("/data1/RFSD")
+RFSD <- open_dataset("local/path/to/RFSD")
 scan_builder <- RFSD$NewScan()
 scan_builder$Filter(Expression$field_ref("year") >= 2011 & Expression$field_ref("year") <= 2018)
 ```
@@ -89,8 +88,8 @@ gc()
 ```
 
     ##             used   (Mb) gc trigger   (Mb)   max used   (Mb)
-    ## Ncells  19004033 1015.0   39849472 2128.2   19010893 1015.3
-    ## Vcells 544748929 4156.2 1244619827 9495.7 1212099398 9247.6
+    ## Ncells  19005762 1015.1   41532831 2218.1   19009964 1015.3
+    ## Vcells 535850505 4088.3 1233347963 9409.7 1202530129 9174.6
 
 ``` r
 # Rename variables
@@ -112,18 +111,18 @@ close as possible.
 ## Only eligible firms filing statements or where we could reconstruct
 ## it from previous year data
 financials <- financials[eligible == 1 & (filed == 1 | imputed == 1)]
-uniqueN(financials$inn) # 3789872
+uniqueN(financials$inn) # 3789880
 ```
 
-    ## [1] 3789872
+    ## [1] 3789880
 
 ``` r
 ## Only firms in manufacturing
 financials <- financials[okved_section == "C"]
-uniqueN(financials$inn) # 328705
+uniqueN(financials$inn) # 329079
 ```
 
-    ## [1] 328705
+    ## [1] 329079
 
 # Deflation
 
@@ -194,37 +193,37 @@ financials <- financials[year >= 2012 & year <= 2018]
 
 ## Remove firms where at least one of variables is missing or is negative
 financials <- financials[ revenue > 0 & materials > 0 & capital > 0 & labour > 0 & investment > 0]
-uniqueN(financials$inn) # 31775
+uniqueN(financials$inn) # 31850
 ```
 
-    ## [1] 31775
+    ## [1] 31850
 
 ``` r
 ## Remove firms with zero or negative value added
 financials[, va := revenue - materials]
 financials <- financials[ va > 0]
-uniqueN(financials$inn) # 28590
+uniqueN(financials$inn) # 28647
 ```
 
-    ## [1] 28590
+    ## [1] 28647
 
 ``` r
 ## Remove firms with gaps in filing
 financials[, obs_per_firm := .N, by = "inn"]
 financials[, obs_per_firm_expected := max(year) - min(year) + 1, by = c("inn") ]
 financials <- financials[obs_per_firm_expected == obs_per_firm]
-uniqueN(financials$inn) # 24257
+uniqueN(financials$inn) # 24330
 ```
 
-    ## [1] 24257
+    ## [1] 24330
 
 ``` r
 ## Only firms active for more than 1 year
 financials <- financials[ obs_per_firm > 1]
-uniqueN(financials$inn) # 15119
+uniqueN(financials$inn) # 15144
 ```
 
-    ## [1] 15119
+    ## [1] 15144
 
 ``` r
 financials[, c("obs_per_firm", "obs_per_firm_expected") := NULL]
@@ -313,9 +312,9 @@ kable(factor_elasticities, caption = "Replication of KZ Table 1 With Factor Elas
 | 03\. Wood and products of wood and cork      |   0.74 |    0.05 |
 | 04\. Pulp, paper, printing and publishing    |   0.82 |    0.07 |
 | 05\. Coke, refined petroleum                 |   0.73 |   -0.04 |
-| 06\. Chemicals and chemical products         |   0.72 |    0.02 |
+| 06\. Chemicals and chemical products         |   0.73 |    0.02 |
 | 07\. Pharmaceutical products                 |   0.82 |    0.20 |
-| 08\. Rubber and plastics                     |   0.79 |    0.09 |
+| 08\. Rubber and plastics                     |   0.80 |    0.09 |
 | 09\. Other non-metallic mineral              |   0.69 |    0.05 |
 | 10\. Basic metals                            |   0.63 |    0.06 |
 | 11\. Fabricated metals                       |   0.75 |    0.05 |
@@ -339,13 +338,14 @@ provide 5 explanations for the apparent failure to replicate KZ exactly:
 
 - **Data differences between Orbis and the RFSD**. The latter source
   includes more firms, as documented in our comparison in the [RFSD
-  companion paper](https://doi.org/10.1038/s41597-025-05150-1): \> Out of 185,222
-  firms with financials for 2021 available in our Orbis sample, the vast
-  majority of firms (182,641, 98.6%) also have their financials in the
-  RFSD for 2021. The firms present in both data sets had over \$2
-  trillion of total revenue or assets, forming the bulk of the Russian
-  economy in 2021. The RFSD also includes 58,835 firms reporting over
-  \$1 million in revenue in 2021 that are missing in Orbis.
+  companion paper](https://doi.org/10.1038/s41597-025-05150-1): \> Out
+  of 185,222 firms with financials for 2021 available in our Orbis
+  sample, the vast majority of firms (182,641, 98.6%) also have their
+  financials in the RFSD for 2021. The firms present in both data sets
+  had over \$2 trillion of total revenue or assets, forming the bulk of
+  the Russian economy in 2021. The RFSD also includes 58,835 firms
+  reporting over \$1 million in revenue in 2021 that are missing in
+  Orbis.
 
 - **Differences in sample restrictions**. We remove firms with gaps in
   data in 2012-2018. This is reasonable as it is impossible to calculate
