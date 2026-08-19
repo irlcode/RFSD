@@ -258,16 +258,16 @@ All notable changes to this project will be documented below. The format is base
 
 ### Added
 - Financial statements for 2025 have been added, totaling approximately 2.17 million observations.
-- More than 22,000 reports for 2021--2024 were either imputed from 2025 filings or parsed from newly published reports for past periods.
+- More than 22,000 reports for 2021–2024 were either imputed from 2025 filings or parsed from newly published reports for past periods.
 
 ### Fixed
-- Fixed adjustment procedure for equity amount as of December 31 of the previous year (`line_3200`) --- in the previous versions it did not account for change in additional equity resulting in incorrect values.
+- Fixed adjustment procedure for equity amount as of December 31 of the previous year (`line_3200`) — in the previous versions it did not account for change in additional equity resulting in incorrect values.
 
 ### Changed
-- This year firms had to submit reports using new forms. Please notice, in some sections changes to the form are significant, we advise users to compare [old](https://www.consultant.ru/document/cons_doc_LAW_103394/b990bf4a13bd23fda86e0bba50c462a174c0d123/) and [new](https://www.consultant.ru/document/cons_doc_LAW_472684/64841be2c02d6fa0043e4c68d9dcd65391427794/) codes. Example: in simplified form, account receivable used to be reflected in line 1230, whereas in new form --- in line 1240. We did not try to harmonize such transitions, opting for predictability, that is, agreement with the official source  and the codes from the forms that were in effect at the relevant periods. 
+- This year firms had to submit reports using new forms. Please notice, in some sections changes to the form are significant, we advise users to compare [old](https://www.consultant.ru/document/cons_doc_LAW_103394/b990bf4a13bd23fda86e0bba50c462a174c0d123/) and [new](https://www.consultant.ru/document/cons_doc_LAW_472684/64841be2c02d6fa0043e4c68d9dcd65391427794/) codes. Example: in simplified form, accounts receivable used to be reflected in line 1230, whereas in new form — in line 1240. We did not try to harmonize such transitions, opting for predictability, that is, agreement with the official source  and the codes from the forms that were in effect at the relevant periods. 
 - Geocoding quality improved substantially:
     - In this version we employed a second geocoder, [Photon](https://photon.komoot.io/), that receives addresses for which [Nominatim](https://nominatim.org/) failed to provide precise (house-level) coordinates.
-    - Whereas before to assign geocoding quality we relied on `place_rank` from Nominatim's response, this time we implemented a more rigorous approach: the quality level is decided based on comparison of original and response addresses normalized with [Pullenti](https://garfias.ru/demo). If they match to building the value in `geocoding_quality` column is set to `"house"`, to the street --- `"street"`, and `"city"` in all other cases where either of geocoders returned any coordinates at all. If match level is the same for both geocoders coordinates form Nominatim get priority.  
+    - Whereas before to assign geocoding quality we relied on `place_rank` from Nominatim's response, this time we implemented a more rigorous approach: the quality level is decided based on comparison of original and response addresses normalized with [Pullenti](https://garfias.ru/demo). If they match to building the value in `geocoding_quality` column is set to `"house"`, to the street — `"street"`, and `"city"` in all other cases where either of geocoders returned any coordinates at all. If match level is the same for both geocoders coordinates form Nominatim get priority.  
 <div align="center" width="60%">
     <img src="figures/geocoding_comparison.png" alt="Line plot comparing geocoding qulity between RFSD versions" />
 </div>
