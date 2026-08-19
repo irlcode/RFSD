@@ -254,7 +254,7 @@ We intend to update the RFSD annualy as the data becomes available, in other wor
 
 All notable changes to this project will be documented below. The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [3.0.0] - 2026-08-17
+## [3.0.0] - 2026-08-20
 
 ### Added
 - Financial statements for 2025 have been added, totaling approximately 2.17 million observations.
