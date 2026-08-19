@@ -24,6 +24,7 @@ lon,lon
 lat,lat
 geocoding_quality,geocoding_quality
 line_1100,B_noncurrent_assets
+line_1105,B_goodwill
 line_1110,B_intangible_assets
 line_1120,B_research_development
 line_1130,B_intangible_exploration
@@ -35,6 +36,7 @@ line_1180,B_def_tax_assets
 line_1190,B_other_noncurrent_assets
 line_1200,B_current_assets
 line_1210,B_inventories
+line_1215,B_longterm_assets_forsale
 line_1220,B_vat_receivable
 line_1230,B_accounts_receivable
 line_1240,B_fin_invest
@@ -43,6 +45,7 @@ line_1260,B_other_current
 line_1300,B_total_equity
 line_1310,B_charter_capital
 line_1320,B_treasury_shares
+line_1330,B_targeted_funds
 line_1340,B_reval_assets
 line_1350,B_add_capital
 line_1360,B_reserve_capital
@@ -75,6 +78,7 @@ line_2300,PL_before_tax
 line_2410,PL_income_tax
 line_2411,PL_current_income_tax
 line_2412,PL_def_income_tax
+line_2420,PL_profitloss_discontinued_operations
 line_2421,PL_tax_liab
 line_2430,PL_change_def_tax_liab
 line_2450,PL_change_def_tax_assets
@@ -87,6 +91,9 @@ line_2500,PL_total
 line_2900,PL_basic_earnings_share
 line_2910,PL_diluted_earnings_share
 line_3100,Epp_equity
+line_3101,Epp_equity_adjusted
+line_3110,ADJ_policy_new
+line_3120,ADJ_error_new
 line_3210,Ep_incr
 line_3211,Ep_incr_net_profit
 line_3212,Ep_incr_asset_reval
@@ -106,8 +113,9 @@ line_3227,Ep_decr_dividends
 line_322x,Ep_decr_special
 line_3230,Ep_change_add
 line_3240,Ep_change_reserve
+line_3250,Ep_analogous_period
 line_3200,Ep_equity
-line_3310,E_incr
+line_3201,Ep_equity_adjusted
 line_3311,E_incr_net_profit
 line_3312,E_incr_asset_reval
 line_3313,E_incr_income
@@ -144,6 +152,7 @@ line_4110,CFi_operating
 line_4111,CFi_sales
 line_4112,CFi_payments
 line_4113,CFi_resale_invest
+line_4114,CFi_interest_customers
 line_411x,CFi_firm_specific
 line_4119,CFi_other
 line_4120,CFo_operating
