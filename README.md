@@ -9,7 +9,7 @@ The Russian Financial Statements Database (RFSD) is an open, harmonized collecti
 
 - 🏛️ Sourced from two official data providers: the [Rosstat](https://rosstat.gov.ru/opendata/7708234640-7708234640bdboo2018) and the [Federal Tax Service](https://bo.nalog.ru).
 
-- 📅 Covers 2011-2024, will be continuously updated.
+- 📅 Covers 2011-2025, will be continuously updated.
 
 - 🏗️ Restores as much data as possible through non-invasive data imputation, statement articulation, and harmonization.
 
@@ -254,6 +254,26 @@ We intend to update the RFSD annualy as the data becomes available, in other wor
 
 All notable changes to this project will be documented below. The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [3.0.0] - 2026-08-17
+
+### Added
+- Financial statements for 2025 have been added, totaling approximately 2.17 million observations.
+- More than 22,000 reports for 2021--2024 were either imputed from 2025 filings or parsed from newly published reports for past periods.
+
+### Fixed
+- Fixed adjustment procedure for equity amount as of December 31 of the previous year (`line_3200`) --- in the previous versions it did not account for change in additional equity resulting in incorrect values.
+
+### Changed
+- This year firms had to submit reports using new forms. Please notice, in some sections changes to the form are significant, we advise users to compare [old](https://www.consultant.ru/document/cons_doc_LAW_103394/b990bf4a13bd23fda86e0bba50c462a174c0d123/) and [new](https://www.consultant.ru/document/cons_doc_LAW_472684/64841be2c02d6fa0043e4c68d9dcd65391427794/) codes. Example: in simplified form, account receivable used to be reflected in line 1230, whereas in new form --- in line 1240. We did not try to harmonize such transitions, opting for predictability, that is, agreement with the official source  and the codes from the forms that were in effect at the relevant periods. 
+- Geocoding quality improved substantially:
+    - In this version we employed a second geocoder, [Photon](https://photon.komoot.io/), that receives addresses for which [Nominatim](https://nominatim.org/) failed to provide precise (house-level) coordinates.
+    - Whereas before to assign geocoding quality we relied on `place_rank` from Nominatim's response, this time we implemented a more rigorous approach: the quality level is decided based on comparison of original and response addresses normalized with [Pullenti](https://garfias.ru/demo). If they match to building the value in `geocoding_quality` column is set to `"house"`, to the street --- `"street"`, and `"city"` in all other cases where either of geocoders returned any coordinates at all. If match level is the same for both geocoders coordinates form Nominatim get priority.  
+<div align="center" width="60%">
+    <img src="figures/geocoding_comparison.png" alt="Line plot comparing geocoding qulity between RFSD versions" />
+</div>
+<br>
+
+
 ## [2.0.3] - 2025-09-12
 
 ### Fixed
@@ -319,12 +339,13 @@ The updated lines 2400 are quite different from the original values. The value o
 ## ToDo and Known Deficiencies
 Below is our To-Do list, we will be grateful for any contributions you can make. If you spot a bug, just raise it as a GitHub issue.
 
-- [ ] Improve geocoding quality (https://github.com/irlcode/rfsd/issues/1)
+- [X] Improve geocoding quality (https://github.com/irlcode/rfsd/issues/1)
 - [ ] Better outlier detection procedure (https://github.com/irlcode/rfsd/issues/2)
 - [ ] Better detection of financial firms (https://github.com/irlcode/rfsd/issues/3)
 - [ ] Improve next-year imputation procedure (https://github.com/irlcode/rfsd/issues/4)
 - [X] Explain differences with [Mogilyat et al. (2024)](https://github.com/irlcode/RFSD/blob/main/use_cases/interest_payments.md) (https://github.com/irlcode/rfsd/issues/5)
 - [ ] Explain differences with [Kaukin and Zhemkova (2023)](https://github.com/irlcode/RFSD/blob/main/use_cases/tfp.md) (https://github.com/irlcode/rfsd/issues/6)
+- [ ] Update replication code
 
 
 ## Licence
