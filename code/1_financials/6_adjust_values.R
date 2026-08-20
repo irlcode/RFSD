@@ -1,9 +1,8 @@
 library(fst)
 library(data.table)
-setDTthreads(0)
 
 # Load data
-russian_financials <- read_fst("temp/combined_financials_impFrNY_negLinesCorr.fst", as.data.table = T)
+russian_financials <- read_fst(file.path("temp", "combined_financials_impFrNY_negLinesCorr.fst"), as.data.table = T)
 russian_financials[, adj_any := 0]
 
 # Declare imputation function
@@ -23,10 +22,10 @@ impute <- function(dt, imp_target, lines_to_sum, flag_imputation = T) {
     dt[, orig_value := imp_target, env = env]
 
     # Always impute if original value is NA
-    dt[is.na(imp_target), imp_target := imp_value, env = env]
+    dt[is.na(orig_value), imp_target := imp_value, env = env]
 
-    # If original value is present change it to the calculate only where their abs diff is > 4 thousand roubles
-    dt[!is.na(imp_target) & !is.na(imp_value), imp_target := fifelse(abs(imp_target - imp_value) > 4, imp_value, imp_target), env = env]
+    # If the original value is present change it to the calculated only where their abs diff is > 4 thousand roubles
+    dt[!is.na(orig_value) & !is.na(imp_value), imp_target := fifelse(abs(orig_value - imp_value) > 4, imp_value, orig_value), env = env]
     
     # If adjustment indicator column was 0 change it to 1
     if(flag_imputation == T) {
@@ -74,7 +73,7 @@ XX00_lines_for_simple_imp <- c("line_1100",
                                "line_6300") 
 
 for(imp_target in XX00_lines_for_simple_imp) {
-    regex <- paste0(stringi::stri_sub(imp_target, 1, -3), "[1-9]0") # e.g. "line_1200" > "line_12[1-9]0"
+    regex <- paste0(stringi::stri_sub(imp_target, 1, -3), "([1-9]0|05|15)") # e.g. "line_1200" > "line_12[1-9]0"
     lines_to_sum <- grep(regex, names(russian_financials), value = T)
     impute(russian_financials, imp_target, lines_to_sum)
 }
@@ -100,11 +99,11 @@ impute(russian_financials_full, "line_2300", c("line_2200", "line_2310", "line_2
 # Impute 24XX
 
 ## Imputing 2412 and 2410 is theoretically right but in practice it adds erroneous values
-impute(russian_financials_full, "line_2400", c("line_2300", "line_2410", "line_2460"))
+impute(russian_financials_full, "line_2400", c("line_2300", "line_2410", "line_2420", "line_2460"))
 
 # # Check
-# russian_financials_full[inn == "7703443256", .(year, line_2400, line_2300, line_2410, line_2411, line_2460)]
-# russian_financials_full[year >= 2019][inn %in% sample(inn, 5), .(inn, year, line_2400, line_2300, line_2410, line_2411, line_2460)]
+# russian_financials_full[inn == "7703443256", .(year, line_2400, line_2300, line_2410, line_2411,line_2412,  line_2460)]
+# russian_financials_full[year >= 2019][inn %in% sample(inn, 5), .(inn, year, line_2400, line_2300, line_2410, line_2411, line_2412, line_2420, line_2460)]
 
 # ## Construct 24XX lines with the same meaning across different periods
 # russian_financials_full[, line_2410_uniform_tax := NA_real_]
@@ -146,12 +145,12 @@ impute(russian_financials_full, "line_2500", c("line_2400", "line_2510", "line_2
 # impute(russian_financials_full[year >= 2019], "line_2500_uniform_tax", c("line_2410_uniform_tax", "line_2510", "line_2520", "line_2530"), flag_imputation = F)
 
 # Impute 3XXX and 4XXX
-impute(russian_financials_full, "line_3230", c("line_3210", "line_3220"))
-impute(russian_financials_full, "line_3200", c("line_3100", "line_3210", "line_3220")) 
-impute(russian_financials_full, "line_3300", c("line_3200", "line_3310", "line_3320"))
+# impute(russian_financials_full, "line_3230", c("line_3210", "line_3220"))
+# impute(russian_financials_full, "line_3200", c("line_3100", "line_3210", "line_3220"))
+# impute(russian_financials_full, "line_3300", c("line_3200", "line_3310", "line_3320"))
 # line_3400?
-impute(russian_financials_full, "line_3500", c("line_3400", "line_3410", "line_3420"))
-impute(russian_financials_full, "line_3600", c("line_1300"))
+# impute(russian_financials_full, "line_3500", c("line_3400", "line_3410", "line_3420"))
+# impute(russian_financials_full, "line_3600", c("line_1300"))
 impute(russian_financials_full, "line_4100", c("line_4110", "line_4120"))
 impute(russian_financials_full, "line_4200", c("line_4210", "line_4220"))
 impute(russian_financials_full, "line_4300", c("line_4310", "line_4320"))
@@ -161,7 +160,7 @@ impute(russian_financials_full, "line_4500", c("line_4400", "line_4450", "line_4
 ## Simplified statements
 ### Impute
 impute(russian_financials_simple, "line_1600", c("line_1150", "line_1170", "line_1210", "line_1250", "line_1230"))
-impute(russian_financials_simple, "line_1700", c("line_1300", "line_1350", "line_1360", "line_1410", "line_1450", "line_1510", "line_1520", "line_1550"))
+impute(russian_financials_simple, "line_1700", c("line_1300", "line_1410", "line_1450", "line_1510", "line_1520", "line_1550"))
 impute(russian_financials_simple, "line_2200", c("line_2110", "line_2120"))
 impute(russian_financials_simple, "line_2300", c("line_2200", "line_2330", "line_2340", "line_2350"))
 impute(russian_financials_simple, "line_2400", c("line_2110", "line_2120", "line_2330", "line_2340", "line_2350", "line_2410"))
@@ -174,8 +173,9 @@ russian_financials <- rbindlist(list(russian_financials_full, russian_financials
 
 # Tidy up and save
 setorderv(russian_financials, c("inn", "year"))
-maxyear <- last(russian_financials$year)
-write_fst(russian_financials, glue::glue("output/russian_financials_2011_{maxyear}.fst"))
+maxyear <- as.numeric(format(Sys.Date(), "%Y")) - 1
+russian_financials <- russian_financials[year <= maxyear]
+write_fst(russian_financials, file.path("temp", glue::glue("output/russian_financials_2011_{maxyear}.fst")))
 
 
 
