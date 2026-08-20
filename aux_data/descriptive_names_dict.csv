@@ -116,6 +116,7 @@ line_3240,Ep_change_reserve
 line_3250,Ep_analogous_period
 line_3200,Ep_equity
 line_3201,Ep_equity_adjusted
+line_3310,E_incr
 line_3311,E_incr_net_profit
 line_3312,E_incr_asset_reval
 line_3313,E_incr_income
