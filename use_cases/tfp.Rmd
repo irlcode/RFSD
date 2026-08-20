@@ -49,11 +49,11 @@ Next, we engage in filtering, trying to mimic KZ filtering logic as close as pos
 ## Only eligible firms filing statements or where we could reconstruct
 ## it from previous year data
 financials <- financials[eligible == 1 & (filed == 1 | imputed == 1)]
-uniqueN(financials$inn) # 3789872
+uniqueN(financials$inn) # 3789880
 
 ## Only firms in manufacturing
 financials <- financials[okved_section == "C"]
-uniqueN(financials$inn) # 328705
+uniqueN(financials$inn) # 329079
 ```
 
 # Deflation
@@ -120,22 +120,22 @@ financials <- financials[year >= 2012 & year <= 2018]
 
 ## Remove firms where at least one of variables is missing or is negative
 financials <- financials[ revenue > 0 & materials > 0 & capital > 0 & labour > 0 & investment > 0]
-uniqueN(financials$inn) # 31775
+uniqueN(financials$inn) # 31850
 
 ## Remove firms with zero or negative value added
 financials[, va := revenue - materials]
 financials <- financials[ va > 0]
-uniqueN(financials$inn) # 28590
+uniqueN(financials$inn) # 28647
 
 ## Remove firms with gaps in filing
 financials[, obs_per_firm := .N, by = "inn"]
 financials[, obs_per_firm_expected := max(year) - min(year) + 1, by = c("inn") ]
 financials <- financials[obs_per_firm_expected == obs_per_firm]
-uniqueN(financials$inn) # 24257
+uniqueN(financials$inn) # 24330
 
 ## Only firms active for more than 1 year
 financials <- financials[ obs_per_firm > 1]
-uniqueN(financials$inn) # 15119
+uniqueN(financials$inn) # 15144
 
 financials[, c("obs_per_firm", "obs_per_firm_expected") := NULL]
 

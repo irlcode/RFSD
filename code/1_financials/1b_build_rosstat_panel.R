@@ -1,15 +1,16 @@
 library(fst)
 library(data.table)
-setDTthreads(6)
+setDTthreads(0)
 
 # Paths to source files
-zipped_csv_paths <- dir("data/rosstat", pattern = ".zip", full.names = T)
-structure_paths <- dir("data/rosstat", pattern = "structure", full.names = T)
+zipped_csv_paths <- dir("source/rosstat", pattern = ".zip", full.names = T)
+structure_paths <- dir("source/rosstat", pattern = "structure", full.names = T)
 
 # Unzip, fix encoding, set names and rbind together data for all years
 rosstat_financials <- 
     rbindlist(
               mapply(zipped_csv_paths, structure_paths,
+                     SIMPLIFY = F,
 					 FUN = function(d, s) {
                          dt <- fread(cmd = glue::glue("unzip -p {d} | iconv -f CP1251 -t UTF-8"), # convert to UTF-8 before importing
                                      colClasses = "character", 
@@ -25,6 +26,10 @@ rosstat_financials <-
 
 # Check results
 rosstat_financials[, .N, keyby = year]
+
+# Add "line_" prefix to financial vars
+fin_vars <- grep("^\\d{5}$", names(rosstat_financials), value = T)
+setnames(rosstat_financials, fin_vars, paste0("line_", fin_vars))
 
 # Numeric values to numeric class
 line_cols <- grep("line_", names(rosstat_financials), value = T)
@@ -48,26 +53,23 @@ for(line_ in grep("line_", names(rosstat_financials), value = T)) {
 rosstat_financials <- unique(rosstat_financials, by = c("inn", "year"))
 
 # Save
-write_fst(rosstat_financials, "data/rosstat/processed_rosstat_data_2012_2018.fst")
+write_fst(rosstat_financials, file.path(session, "temp/rosstat_financials.fst"))
 
 # ================================================================================
 
-# Shortcut
-rosstat_financials <- read_fst("data/rosstat/processed_rosstat_data_2012_2018.fst", as.data.table = T)
-
-# Split tables into two parts: curent year (names end with "3") and previous year values (names end with "4")
+# Split tables into two parts: curent year (names end with "3") and previous year tables (names end with "4")
 fin_vars_cur <- grep("line_.*?3$", names(rosstat_financials), value = T)
 fin_vars_lag1 <- grep("line_.*?4$", names(rosstat_financials), value = T)
 firm_info <- c("okved", "okpo", "okopf", "okfs", "simplified")
 rosstat_financials_cur <- rosstat_financials[, c("inn", "year", firm_info, fin_vars_cur), with = F]
 rosstat_financials_lag1 <- rosstat_financials[, c("inn", "year", firm_info, fin_vars_lag1), with = F]
 
-# Mark observations that have no information
+# Mark observations that hold no information
 rosstat_financials_cur[, all_na := as.numeric(rowSums(!is.na(.SD)) == 0), .SDcols = patterns("line_")]
 rosstat_financials_lag1[, all_na := as.numeric(rowSums(!is.na(.SD)) == 0), .SDcols = patterns("line_")]
 
 # Keep such observations in current year data, but drop in previous year data: they are no use for imputation
-rosstat_financials_lag1 <- rosstat_financials_lag1[all_na == F]
+rosstat_financials_lag1 <- rosstat_financials_lag1[all_na == 0]
 rosstat_financials_lag1[, all_na := NULL]
 
 # Clear some space
@@ -97,7 +99,7 @@ print(dcast(rosstat_financials[, .N, keyby = .(new_obs, all_na)], new_obs ~ past
 print(dcast(rosstat_financials[, .N, keyby = .(simplified, all_na)], simplified ~ paste0("all_na_", all_na)))
 print(rosstat_financials[, lapply(.SD, mean), .SDcols = patterns("imp_"), keyby = year])
 
+# Save
 setorderv(rosstat_financials, c("inn", "year"))
 setcolorder(rosstat_financials, c("inn", "year", firm_info, c("new_obs", "all_na", "imp_any_from_future"), sort(grep("line_", names(rosstat_financials), value = T))))
-dir.create("temp")
-write_fst(rosstat_financials, "temp/rosstat_financials_impFrNY.fst")
+write_fst(rosstat_financials, file.path("temp", "rosstat_financials_impFrNY.fst"))

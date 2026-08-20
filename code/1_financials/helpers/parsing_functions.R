@@ -1,19 +1,16 @@
 # Function to extract value by XPath
-extr_val <- function(doc, node_name, att) {
+extr_val <- function(doc, node_path, att) {
 
-    if (!grepl("\\|", node_name)) { # Simple case
+    val <- xml_attr(x = xml_find_all(doc, node_path), attr = att)
 
-        val <- xml_text(xml_find_all(doc, paste0("//", node_name, "/@", att)))
+    if(grepl("ИзмДобавКап|ИзмРезервКап|УвеличНомАкц", node_path)) {
 
-    } else { # Complex case where xpath varies (variants are passed separated by `|`)
-
-        node_names <- unlist(strsplit(node_name, "|", fixed = T), use.names = F)
-        val <- xml_text(xml_find_all(doc, paste(paste0("//", node_names, "/@", att), collapse = "|")))
+        val <- xml_attrs(xml_find_all(doc, paste0("//", node_path)))
     }
 
-    if (length(val) > 0) {
+    if(length(val) > 0) {
 
-        val
+        sum(as.numeric(unlist(val)), na.rm = T)
 
     } else {
 
@@ -22,176 +19,236 @@ extr_val <- function(doc, node_name, att) {
     }
 }
 
-
 # Gets values and writes to CSV
-parse_xml <- function(xml_path, dir_year, temp_output_dir) {
-
+parse_xml <- function(file_path, dir_year, temp_output_dir) {
+    
     process_id <- Sys.getpid() # to use in file names so that every process writes in its own file
 
+    xml_doc <- tryCatch(read_xml(file_path),
+                        error = function(e) {
+                            failed_xmls <- glue::glue("{temp_output_dir}/corrupted_xmls_pid{process_id}.csv")
+                            fwrite(list(path = file_path), failed_xmls, append = T)
+
+                            # Skip to the next file
+                            return(NULL)
+
+                        })
+
+    meta <- list(
+        file_name =  xml_text(xml_find_first(xml_doc, "//Файл/@ИдФайл")),
+        form_version = xml_text(xml_find_first(xml_doc, "//Файл/@ВерсФорм")),
+        okei = xml_text(xml_find_first(xml_doc, "//Документ/@ОКЕИ")),
+        knd = xml_text(xml_find_first(xml_doc, "//Документ/@КНД")),
+        corr = xml_text(xml_find_first(xml_doc, "//Документ/@НомКорр")),
+        file_date = xml_text(xml_find_first(xml_doc, "//Документ/@ДатаДок")),
+        # year <- as.numeric(xml_text(xml_find_first(xml_doc, "//Документ/@ОтчетГод"))),
+        reported_period = xml_text(xml_find_first(xml_doc, "//Документ/@Период"))
+    )
+    meta <- lapply(meta, function(x) ifelse(length(x) == 0, NA, x))
+
+    firm_info <- list(
+        inn = xml_text(xml_find_first(xml_doc, "//НПЮЛ/@ИННЮЛ")),
+        okved = xml_text(xml_find_first(xml_doc, "//СвНП/@ОКВЭД2")),
+        okopf = xml_text(xml_find_first(xml_doc, "//СвНП/@ОКОПФ")),
+        okpo = xml_text(xml_find_first(xml_doc, "//СвНП/@ОКПО")),
+        okfs = xml_text(xml_find_first(xml_doc, "//СвНП/@ОКФС"))
+    )
+    firm_info <- lapply(firm_info, function(x) ifelse(length(x) == 0, NA, x))
+
+    if(!is.na(meta$knd) && meta$knd == "0710099") {
+        must_audit = xml_text(xml_find_first(xml_doc, "//Документ/@ПрАудит"))
+        if(!is.na(must_audit) && must_audit == "1") {
+            audit_filename = xml_text(xml_find_first(xml_doc, "//Документ/АудитЗакл/@НаимФайлАЗ"))
+            audit_org_inn = xml_text(xml_find_first(xml_doc, "//Документ/СвАудит/@ИННЮЛ"))
+            fwrite(c(firm_info, meta, list(year = dir_year, audit_filename = audit_filename, audit_org_inn = audit_org_inn)),
+                   glue::glue("{temp_output_dir}/must_audit_pid{process_id}.csv"),
+                   append = T)
+        }
+    }
+
+    # ==========================================================================
+
+    if_known_form <- meta$form_version %in% c("5.03", "5.08", "5.04", "5.10")
+    if_old_form <- meta$form_version %notin% c("5.04", "5.10")
+    if_noncomm <- substr(firm_info$okopf, 1, 1) %in% c("2", "7")
+    form_type <- ifelse(!is.na(meta$knd) && meta$knd == "0710099", "FULL", "SIMPLE")
+
+    if(if_known_form) {
+        xml_scheme <- get(paste0("scheme_v", meta$form_version))
+
+        if(!is.na(meta$form_version) && meta$form_version == "5.03") {
+            balance_paths <- xml_scheme$balance_paths
+        } else {
+            if(if_noncomm) {
+                balance_paths <- xml_scheme$balance_noncomm_paths
+            } else {
+                balance_paths <- xml_scheme$balance_comm_paths
+            }
+        }
+    } else {
+        if(form_type == "FULL") {
+            xml_scheme <- scheme_v5.08
+            if(if_noncomm) {
+                balance_paths <- xml_scheme$balance_noncomm_paths
+            } else {
+                balance_paths <- xml_scheme$balance_comm_paths
+            }
+        } else {
+            xml_scheme <- scheme_v5.03
+            balance_paths <- xml_scheme$balance_paths
+        }
+    }
+
+    # ==========================================================================
+
     # Current year's values
+    cur_year <- tryCatch(
+        {
+            balance <- lapply(balance_paths, FUN = extr_val, doc = xml_doc, att = "СумОтч")
+            finres <- lapply(xml_scheme$finres_paths, FUN = extr_val, doc = xml_doc, att = "СумОтч")
+            equity <- lapply(xml_scheme$equity_paths, FUN = extr_val, doc = xml_doc, att = "Итог")
+            equity_prev <- lapply(xml_scheme$equity_lag1_paths, FUN = extr_val, doc = xml_doc, att = "Итог")
+            equity_total_prevprev <- extr_val(doc = xml_doc, node_path = xml_scheme$equity_lag2_path, att = "Итог")
 
-    cur_year_parsed <- tryCatch(
-                                {
-                                    xml_doc <- read_xml(xml_path)
+            cashflow <- lapply(xml_scheme$cashflow_paths, FUN = extr_val, doc = xml_doc, att = "СумОтч")
+            designated_use <- lapply(xml_scheme$designated_use_paths, FUN = extr_val, doc = xml_doc, att = "СумОтч")
 
-                                    year <- as.numeric(xml_text(xml_find_all(xml_doc, "//Документ/@ОтчетГод")))
+            row <- c(firm_info,
+                     list(year = dir_year),
+                     meta,
+                     balance,
+                     finres,
+                     equity,
+                     equity_prev,
+                     list(line_3100 = equity_total_prevprev),
+                     cashflow,
+                     designated_use)
 
-                                    firm_info <- list(
-                                                      inn = extr_val(xml_doc, "НПЮЛ", "ИННЮЛ"),
-                                                      okved = extr_val(xml_doc, "СвНП", "ОКВЭД2"),
-                                                      okopf = extr_val(xml_doc, "СвНП", "ОКОПФ"),
-                                                      okpo = extr_val(xml_doc, "СвНП", "ОКПО"),
-                                                      okfs = extr_val(xml_doc, "СвНП", "ОКФС")
-                                                      # simplified = as.numeric(grepl("BOUPR", file_name, ignore.case = T))
-                                    )
-                                    meta <- list(
-                                                file_name =  xml_text(xml_find_all(xml_doc, "//Файл/@ИдФайл")),
-                                                okei = xml_text(xml_find_all(xml_doc, "//Документ/@ОКЕИ")),
-                                                knd = xml_text(xml_find_all(xml_doc, "//Документ/@КНД")),
-                                                corr = xml_text(xml_find_all(xml_doc, "//Документ/@НомКорр")),
-                                                file_date = xml_text(xml_find_all(xml_doc, "//Документ/@ДатаДок")),
-                                                reported_period = xml_text(xml_find_all(xml_doc, "//Документ/@Период"))
-                                                # must_audit = as.numeric(xml_text(xml_find_all(xml_doc, "//Документ/@ПрАудит")))
-                                    )            
+            if(if_old_form) {
+                corrections <- lapply(xml_scheme$correct_paths, FUN = extr_val, doc = xml_doc, att = "На31ДекПред")
+                net_assets <- extr_val(doc = xml_doc, node_path = xml_scheme$net_assets_path, att = "На31ДекОтч")
+                row <- c(row, corrections, list(line_3600 = xml_scheme$net_assets))
+            }
 
-                                    balance <- lapply(balance_tags, FUN = extr_val, doc = xml_doc, att = "СумОтч")
-                                    finres <- lapply(finres_tags, FUN = extr_val, doc = xml_doc, att = "СумОтч")
-                                    equity <- lapply(lapply(changes_in_equity_cur_tags, FUN = extr_val, doc = xml_doc, att = "Итог"), function(x) as.character(sum(as.numeric(x))))
-                                    equity_total_lag2 <- extr_val(doc = xml_doc, node_name = equity_lag2, att = "Итог")
-                                    corrections <- lapply(correct_tags, FUN = extr_val, doc = xml_doc, att = "На31ДекПред")
-                                    net_assets <- extr_val(doc = xml_doc, node_name = net_assets_tag, att = "На31ДекОтч")
-                                    cashflow <- lapply(lapply(cashflow_tags, FUN = extr_val, doc = xml_doc, att = "СумОтч"), function(x) as.character(sum(as.numeric(x))))
-                                    designated_use <- lapply(designated_use_tags, FUN = extr_val, doc = xml_doc, att = "СумОтч")
+            row <- lapply(row, function(x) ifelse(length(x) == 0, NA, x))
 
-                                    row <- c(firm_info, 
-                                             list(year = year),
-                                             meta,
-                                             balance, 
-                                             finres, 
-                                             equity, 
-                                             corrections, 
-                                             list(line_3600 = net_assets, line_3100 = equity_total_lag2), 
-                                             cashflow, 
-                                             designated_use)
+            # Append new row to file on disk
+            output_file <- glue::glue("{temp_output_dir}/form_v{meta$form_version}_{form_type}_{ifelse(if_noncomm, 'noncomm', 'comm')}_{dir_year}_pid{process_id}_cur.csv")
+            fwrite(row, output_file, append = T)
 
-                                    # Append new row to file on disk
-                                    output_file <- glue::glue("{temp_output_dir}/{dir_year}_{process_id}_cur_result.csv")
-                                    fwrite(as.data.table(row), output_file, append = file.exists(output_file))
+        },
+        error = function(e) {
 
-                                    TRUE
+            failed_xmls <- glue::glue("{temp_output_dir}/corrupted_xmls_pid{process_id}.csv")
+            fwrite(list(path = file_path), failed_xmls, append = T)
 
-                                },
-                                error = function(e) {
-                                    failed_xmls <- glue::glue("{temp_output_dir}/{dir_year}_corrupted_xmls_{process_id}.csv")
-                                    fwrite(data.table(path = xml_path), failed_xmls, append = file.exists(failed_xmls))
-                                    message("cur year")
-                                    message(e$message)
+            # Skip to the next file
+            return(NULL)
 
-                                    FALSE
-
-                                }
+        }
     )
 
-    # If current year's values have been extracted without error get previous year's values
+    # If current year's values have been extracted without error get previous years' values
+    lag1_year <- tryCatch(
+        {
+            balance_lag1 <- as.list(
+                pmax(
+                    sapply(balance_paths,
+                           FUN = extr_val, doc = xml_doc, att = "СумПред"),
+                    sapply(balance_paths,
+                           FUN = extr_val, doc = xml_doc, att = "СумПрдщ"),
+                    na.rm = T)
+            )
 
-    if (cur_year_parsed == T) {
+            finres_lag1 <- as.list(
+                pmax(
+                    sapply(xml_scheme$finres_paths, FUN = extr_val, doc = xml_doc, att = "СумПред"),
+                    sapply(xml_scheme$finres_paths, FUN = extr_val, doc = xml_doc, att = "СумПрдщ"),
+                    na.rm = T)
+            )
 
-        lag1_year_parsed <- tryCatch(
-                                     {
-                                         balance_lag1 <- as.list(
-                                                                 pmax(
-                                                                      sapply(balance_tags, FUN = extr_val, doc = xml_doc, att = "СумПред"),
-                                                                      sapply(balance_tags, FUN = extr_val, doc = xml_doc, att = "СумПрдщ"),
-                                                                      na.rm = T)
-                                         )
 
-                                         finres_lag1 <- as.list(
-                                                                pmax(
-                                                                     sapply(finres_tags, FUN = extr_val, doc = xml_doc, att = "СумПред"),
-                                                                     sapply(finres_tags, FUN = extr_val, doc = xml_doc, att = "СумПрдщ"),
-                                                                     na.rm = T)
-                                         )
+            cashflow_lag1 <- as.list(
+                pmax(
+                    sapply(xml_scheme$cashflow_paths, FUN = extr_val, doc = xml_doc, att = "СумПред"),
+                    sapply(xml_scheme$cashflow_paths, FUN = extr_val, doc = xml_doc, att = "СумПрдщ"),
+                    na.rm = T)
+            )
+            designated_use_lag1 <- as.list(
+                pmax(
+                    sapply(xml_scheme$designated_use_paths, FUN = extr_val, doc = xml_doc, att = "СумПред"),
+                    sapply(xml_scheme$designated_use_paths, FUN = extr_val, doc = xml_doc, att = "СумПрдщ"),
+                    na.rm = T)
+            )
 
-                                         equity_lag1 <- lapply(lapply(changes_in_equity_lag1_tags, FUN = extr_val, doc = xml_doc, att = "Итог"), function(x) as.character(sum(as.numeric(x))))
+            row_lag1 <- c(firm_info,
+                          list(year = dir_year - 1), # NB: year is set to the previous year
+                          meta,
+                          balance_lag1,
+                          finres_lag1,
+                          # equity_lag1,
+                          cashflow_lag1,
+                          designated_use_lag1)
 
-                                         corrections_lag1 <- lapply(correct_tags, FUN = extr_val, doc = xml_doc, att = "На31ДекПрПред")
+            if(if_old_form) {
+                corrections_lag1 <- lapply(xml_scheme$correct_paths, FUN = extr_val, doc = xml_doc, att = "На31ДекПред")
+                net_assets_lag1 <- extr_val(doc = xml_doc, node_path = xml_scheme$net_assets_path, att = "На31ДекОтч")
+                row_lag1 <- c(row_lag1, corrections_lag1, list(line_3600 = net_assets_lag1))
+            }
 
-                                         net_assets_lag1 <- extr_val(doc = xml_doc, node_name = net_assets_tag, att = "На31ДекПред")
+            row_lag1 <- lapply(row_lag1, function(x) ifelse(length(x) == 0, NA, x))
 
-                                         cashflow_lag1 <- as.list(
-                                                                  pmax(
-                                                                       sapply(sapply(cashflow_tags, FUN = extr_val, doc = xml_doc, att = "СумПред"), function(x) as.character(sum(as.numeric(x)))),
-                                                                       sapply(sapply(cashflow_tags, FUN = extr_val, doc = xml_doc, att = "СумПрдщ"), function(x) as.character(sum(as.numeric(x)))),
-                                                                       na.rm = T)
-                                         )
-                                         designated_use_lag1 <- as.list(
-                                                                        pmax(
-                                                                             sapply(designated_use_tags, FUN = extr_val, doc = xml_doc, att = "СумПред"),
-                                                                             sapply(designated_use_tags, FUN = extr_val, doc = xml_doc, att = "СумПрдщ"),
-                                                                             na.rm = T)
-                                         )
+            output_file <- glue::glue("{temp_output_dir}/form_v{meta$form_version}_{form_type}_{ifelse(if_noncomm, 'noncomm', 'comm')}_{dir_year}_pid{process_id}_lag1.csv")
+            fwrite(row_lag1, output_file, append = T)
 
-                                         row_lag1 <- c(firm_info,
-                                                       list(year = year - 1), # NB: year is set to the previous year
-                                                       meta,
-                                                       balance_lag1, 
-                                                       finres_lag1, 
-                                                       equity_lag1, 
-                                                       corrections_lag1, 
-                                                       list(line_3600 = net_assets_lag1), 
-                                                       cashflow_lag1, 
-                                                       designated_use_lag1)
+        },
+        error = function(e) {
+            failed_xmls <- glue::glue("{temp_output_dir}/corrupted_xmls_pid{process_id}.csv")
+            fwrite(list(path = file_path), failed_xmls, append = T)
+            message("lag1 year")
+            message(e$message)
+        }
+    )
 
-                                         output_file <- glue::glue("{temp_output_dir}/{dir_year}_{process_id}_lag1_result.csv")
-                                         fwrite(as.data.table(row_lag1), output_file, append = file.exists(output_file))
+    lag2_year <- tryCatch(
+        {
+            balance_lag2 <- lapply(balance_paths,
+                                   FUN = extr_val, doc = xml_doc, att = "СумПрдшв")
 
-                                     },
-                                     error = function(e) {
-                                         failed_xmls <- glue::glue("{temp_output_dir}/corrupted_xmls_lag1.csv")
-                                         fwrite(data.table(path = xml_path), failed_xmls, append = file.exists(failed_xmls))
-                                         message("lag1 year")
-                                         message(e$message)
+            row_lag2 <- c(firm_info,
+                          list(year = dir_year - 2),
+                          meta,
+                          balance_lag2)
 
-                                         FALSE
+            if(if_old_form) {
+                row_lag2 <- c(row_lag2, list(line_3600 = extr_val(doc = xml_doc, node_path = xml_scheme$net_assets_path, att = "На31ДекПрПред")))
+            }
 
-                                     }
-        )
+            row_lag2 <- lapply(row_lag2, function(x) ifelse(length(x) == 0, NA, x))
 
-        lag2_year_parsed <- tryCatch(
-                                     {
-                                         balance_lag2 <- lapply(balance_tags, FUN = extr_val, doc = xml_doc, att = "СумПрдшв")
-                                         net_assets_lag2 <- extr_val(doc = xml_doc, node_name = net_assets_tag, att = "На31ДекПрПред")
+            output_file <- glue::glue("{temp_output_dir}/form_v{meta$form_version}_{form_type}_{ifelse(if_noncomm, 'noncomm', 'comm')}_{dir_year}_pid{process_id}_lag2.csv")
+            fwrite(row_lag2, output_file, append = T)
 
-                                         row_lag2 <- c(firm_info,
-                                                       list(year = year - 2),
-                                                       meta,
-                                                       balance_lag2,  
-                                                       list(line_3600 = net_assets_lag2))
+        },
+        error = function(e) {
+            failed_xmls <- glue::glue("{temp_output_dir}/corrupted_xmls_pid{process_id}.csv")
+            fwrite(list(path = file_path), failed_xmls, append = T)
+            message("lag2 year")
+            message(e$message)
+        }
+    )
 
-                                         output_file <- glue::glue("{temp_output_dir}/{dir_year}_{process_id}_lag2_result.csv")
-                                         fwrite(as.data.table(row_lag2), output_file, append = file.exists(output_file))
 
-                                     },
-                                     error = function(e) {
-                                         failed_xmls <- glue::glue("{temp_output_dir}/corrupted_xmls_lag2.csv")
-                                         fwrite(data.table(path = xml_path), failed_xmls, append = file.exists(failed_xmls))
-                                         message("lag2 year")
-                                         message(e$message)
 
-                                         FALSE
-
-                                     }
-        )
-
-        # Log that this XML has been processed
-        processed_xmls_log <- glue::glue("{temp_output_dir}/{dir_year}_{process_id}_done.csv")
-        fwrite(data.table(path = xml_path), processed_xmls_log, append = file.exists(processed_xmls_log))
-
-    }
+    # Log that this XML has been processed
+    processed_xmls_log <- file.path(temp_output_dir, glue::glue("{dir_year}_pid{process_id}_done.csv"))
+    fwrite(list(path = file_path), processed_xmls_log, append = T)
 
     # Return nothing
 
     NULL
 
 }
+
+
 

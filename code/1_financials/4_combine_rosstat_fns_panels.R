@@ -1,10 +1,9 @@
 library(fst)
 library(data.table)
-setDTthreads(0)
 
 # Load data ==============================================================================
-rosstat_financials <- read_fst("temp/rosstat_financials_impFrNY.fst", as.data.table = T)
-fns_financials <- read_fst("temp/fns_financials_impFrNY.fst", as.data.table = T)
+rosstat_financials <- read_fst(file.path("temp", "rosstat_financials_impFrNY.fst"), as.data.table = T)
+fns_financials <- read_fst(file.path("temp", "fns_financials_impFrNY.fst"), as.data.table = T)
 
 # Combine Rosstat and GIR BO (BFO) ==========================================================
 combined_financials <- rbindlist(list(
@@ -19,13 +18,15 @@ rm(fns_financials)
 gc()
 
 # Check
-# print(dcast(combined_financials[, .N, keyby = .(year, all_na)], year ~ paste0("all_na_", all_na)))
-# print(dcast(combined_financials[, .N, keyby = .(year, new_obs)], year ~ paste0("new_obs_", new_obs)))
-# print(dcast(combined_financials[, .N, keyby = .(new_obs, all_na)], new_obs ~ paste0("all_na_", all_na)))
-# print(dcast(combined_financials[, .N, keyby = .(simplified, all_na)], simplified ~ paste0("all_na_", all_na)))
-# print(combined_financials[, lapply(.SD, mean), .SDcols = patterns("imp_"), keyby = year])
+print(dcast(combined_financials[, .N, keyby = .(year, all_na)], year ~ paste0("all_na_", all_na)))
+print(dcast(combined_financials[, .N, keyby = .(year, new_obs)], year ~ paste0("new_obs_", new_obs)))
+print(dcast(combined_financials[, .N, keyby = .(new_obs, all_na)], new_obs ~ paste0("all_na_", all_na)))
+print(dcast(combined_financials[, .N, keyby = .(simplified, all_na)], simplified ~ paste0("all_na_", all_na)))
+print(combined_financials[, lapply(.SD, mean), .SDcols = patterns("imp_"), keyby = year])
 
 # Bracketed negative lines values to positive =================================================
+
+neg_optional_lines <- c("line_322x", "line_332x", "line_412x", "line_422x", "line_432x")
 
 neg_lines_full <- paste0("line_", c(
                                     1320:1323,
@@ -46,6 +47,7 @@ neg_lines_full <- paste0("line_", c(
                                     6350:6359,
                                     6300
                                     ))
+neg_lines_full <- c(neg_lines_full, neg_optional_lines)
 
 # Not all the lines are present in data so we repack them as regex
 neg_lines_pattern_full <- paste(neg_lines_full, collapse="|")
@@ -75,6 +77,7 @@ neg_lines_simple <- paste0("line_", c(
                                       6350,
                                       6300
                                       ))
+neg_lines_simple <- c(neg_lines_simple, neg_optional_lines)
 
 # Not all the lines are present in data so we repack them as regex
 neg_lines_pattern_simple <- paste(neg_lines_simple, collapse="|")
@@ -87,4 +90,4 @@ setcolorder(combined_financials, c("inn", "year", "okved", "okpo", "okopf", "okf
                                    "new_obs", "all_na", "imp_any_from_future", 
                                    sort(grep("line_", names(combined_financials), value = T))))
 
-write_fst(combined_financials, "temp/combined_financials_impFrNY_negLinesCorr.fst")
+write_fst(combined_financials, file.path("temp", "combined_financials_impFrNY_negLinesCorr.fst"))
