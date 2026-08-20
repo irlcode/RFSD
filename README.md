@@ -33,15 +33,15 @@ It is as easy as:
 from datasets import load_dataset
 import polars as pl
 
-# This line will download 6.6 GB+ of all RFSD data and store it in a 🤗 cache folder
+# This line will download 7.7 GB+ of all RFSD data and store it in a 🤗 cache folder
 RFSD = load_dataset('irlspbru/RFSD')
 
-# Alternatively, this will download ~540 MB with all financial statements for 2023
+# Alternatively, this will download ~534 MB with all financial statements for 2025
 # to a Polars DataFrame (requires about 8 GB of RAM)
-RFSD_2023 = pl.read_parquet('hf://datasets/irlspbru/RFSD/RFSD/year=2023/*.parquet')
+RFSD_2025 = pl.read_parquet('hf://datasets/irlspbru/RFSD/RFSD/year=2025/*.parquet')
 ```
 
-We provide a file in `aux_data/descriptive_names_dict.csv` which can be used to change the original names of financial variables to user-friendly ones, e.g., `B_revenue` and `CFo_materials` in lieu of `line_2110` and `line_4121`, respectively. Prefixes are for disambiguation purposes: `B_` stands for balance sheet variables, `PL_` — profit and loss statement, `CFi_` and `CFo` — cash inflows and cash outflows, etc. (One can find all the variable definitions in the supplementary materials table in the accompanying paper and [consult](https://www.consultant.ru/document/cons_doc_LAW_32453/) the original statement forms used by firms: full is `KND 0710099`, simplified — `KND 0710096`.)
+We provide a file in `aux_data/descriptive_names_dict.csv` which can be used to change the original names of financial variables to user-friendly ones, e.g., `B_revenue` and `CFo_materials` in lieu of `line_2110` and `line_4121`, respectively. Prefixes are for disambiguation purposes: `B_` stands for balance sheet variables, `PL_` — profit and loss statement, `CFi_` and `CFo_` — cash inflows and cash outflows, etc. (One can find all the variable definitions in the supplementary materials table in the accompanying paper and [consult](https://www.consultant.ru/document/cons_doc_LAW_32453/) the original statement forms used by firms: full is `KND 0710099`, simplified — `KND 0710096`.)
 
 ``` Python
 # Give suggested descriptive names to variables
@@ -135,7 +135,7 @@ To the best of our knowledge, the RFSD is the only open data set with up-to-date
 
 #### What is the data period?
 
-We provide financials for Russian firms in 2011-2024. We will add the data for 2025 by July, 2026 (see Version and Update Policy below).
+We provide financials for Russian firms in 2011-2025. We will add the data for 2026 by July, 2027 (see Version and Update Policy below).
 
 #### Why are there no data for firm X in year Y?
 
@@ -214,6 +214,7 @@ The below figure explains how we constructed the data set. An annotated `Makefil
 ├── figures
 │   ├── dataset_construction.png
 │   ├── filing_by_month.png
+│   ├── geocoding_comparison.png
 │   ├── interest_figure2-1.png
 │   ├── interest_figure3-1.png
 │   ├── interest_figure3alt-1.png
@@ -257,22 +258,21 @@ All notable changes to this project will be documented below. The format is base
 ## [3.0.0] - 2026-08-20
 
 ### Added
-- Financial statements for 2025 have been added, totaling approximately 2.17 million observations.
-- More than 22,000 reports for 2021–2024 were either imputed from 2025 filings or parsed from newly published reports for past periods.
+- Financial statements for 2025 have been added, totaling approximately 2.17 million new observations.
+- More than 22,000 reports for 2021–2024 were either imputed from 2025 filings or parsed from newly published reports for previous periods.
 
 ### Fixed
-- Fixed adjustment procedure for equity amount as of December 31 of the previous year (`line_3200`) — in the previous versions it did not account for change in additional equity resulting in incorrect values.
+- Fixed adjustment procedure for equity as of December 31 of the previous year (`line_3200`) — before it did not account for changes in additional equity resulting in incorrect values.
 
 ### Changed
-- This year firms had to submit reports using new forms. Please notice, in some sections changes to the form are significant, we advise users to compare [old](https://www.consultant.ru/document/cons_doc_LAW_103394/b990bf4a13bd23fda86e0bba50c462a174c0d123/) and [new](https://www.consultant.ru/document/cons_doc_LAW_472684/64841be2c02d6fa0043e4c68d9dcd65391427794/) codes. Example: in simplified form, accounts receivable used to be reflected in line 1230, whereas in new form — in line 1240. We did not try to harmonize such transitions, opting for predictability, that is, agreement with the official source  and the codes from the forms that were in effect at the relevant periods. 
+- Starting from 2025 firms are required to submit financial reports using new forms. These forms have changed significantly, we advise the users to compare the [old](https://www.consultant.ru/document/cons_doc_LAW_103394/b990bf4a13bd23fda86e0bba50c462a174c0d123/) and the [new](https://www.consultant.ru/document/cons_doc_LAW_472684/64841be2c02d6fa0043e4c68d9dcd65391427794/) forms. One example: in a simplified form, accounts receivable used to be reflected in `line_1230`, whereas in the new form — in `line_1240`. We did not try to harmonize such transitions, opting for predictability, that is, agreement with the official source and the codes from the forms that were in effect at the corresponding periods. 
 - Geocoding quality improved substantially:
     - In this version we employed a second geocoder, [Photon](https://photon.komoot.io/), that receives addresses for which [Nominatim](https://nominatim.org/) failed to provide precise (house-level) coordinates.
-    - Whereas before to assign geocoding quality we relied on `place_rank` from Nominatim's response, this time we implemented a more rigorous approach: the quality level is decided based on comparison of original and response addresses normalized with [Pullenti](https://garfias.ru/demo). If they match to building the value in `geocoding_quality` column is set to `"house"`, to the street — `"street"`, and `"city"` in all other cases where either of geocoders returned any coordinates at all. If match level is the same for both geocoders coordinates form Nominatim get priority.  
+    - Whereas before to assign geocoding quality we relied on `place_rank` from Nominatim's response, this time we implemented a more rigorous approach: the quality level is decided based on comparison of the original and response addresses normalized with [Pullenti Address SDK](https://garfias.ru/). If they match up to a house the value in `geocoding_quality` column is set to `"house"`, to the street — `"street"`, and `"city"` in all other cases where either of geocoders returned any coordinates at all. If the match level is the same for Nominatim and Photon, coordinates from Nominatim are used.  
 <div align="center" width="60%">
-    <img src="figures/geocoding_comparison.png" alt="Line plot comparing geocoding qulity between RFSD versions" />
+    <img src="figures/geocoding_comparison.png" alt="Line plot comparing geocoding quality between RFSD versions" />
 </div>
 <br>
-
 
 ## [2.0.3] - 2025-09-12
 
@@ -280,8 +280,8 @@ All notable changes to this project will be documented below. The format is base
 - Added previously missing `okopf`, `okfc`, and `okpo` values for new firms entering in 2024.
 
 ### Changed
-- Improved `okopf` completeness: previously the data on this classification code came only from the Rosstat's [Statistical Register of Economic Entities](https://rosstat.gov.ru/opendata/7708234640-urid1) whereas now it is sourced from the Federal Tax Service's EGRUL and GIR BO filings (with EGRUL taking precedence). As a result, we were able to fill missing `okopf` for <1% of firms, futher slightly improving `eligible` classification.
-- Impovements in eligibility classification prompted by reduction `okopf` missingness allowed us to remove about 7 thousand  non-filing organisations from the data. Now that we had their `okopf` we could confidently classify them as non-eligible non-filers (they had had missing `okopf` before and were treated as eligible non-filers to be on the safe side). Those organisations are primarily government or municipal agencies or religious entities that are not required to file their financial statements.
+- Improved `okopf` completeness: previously the data on this classification code came only from the Rosstat's [Statistical Register of Economic Entities](https://rosstat.gov.ru/opendata/7708234640-urid1) whereas now it is sourced from the Federal Tax Service's EGRUL and GIR BO filings (with EGRUL taking precedence). As a result, we were able to fill missing `okopf` for <1% of firms, further slightly improving `eligible` classification.
+- Improvements in eligibility classification prompted by reduction in `okopf` missingness allowed us to remove about 7 thousand non-filing organisations from the data. Now that we had their `okopf` we could confidently classify them as non-eligible non-filers (they had had missing `okopf` before and were treated as eligible non-filers to be on the safe side). Those organisations are primarily government or municipal agencies or religious entities that are not required to file their financial statements.
 
 ## [2.0.2] - 2025-09-04
 
