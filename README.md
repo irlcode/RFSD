@@ -153,7 +153,7 @@ We use Nominatim to geocode structured addresses of incorporation of legal entit
 
 #### Why is the data for firm X different from https://bo.nalog.ru/?
 
-Many firms submit correcting statements after the initial filing. While we have downloaded the data way past the April 1, 2025 deadline for 2024 filings, firms may have kept submitting the correcting statements. We will capture them in the future releases.
+Many firms submit correcting statements after the initial filing. While we have downloaded the data way past the April 1, 2026 deadline for 2025 filings, firms may have kept submitting the correcting statements. We will capture them in the future releases.
 
 #### Why is the data for firm X unrealistic?
 
@@ -267,8 +267,8 @@ All notable changes to this project will be documented below. The format is base
 ### Changed
 - Starting from 2025 firms are required to submit financial reports using new forms. These forms have changed significantly, we advise the users to compare the [old](https://www.consultant.ru/document/cons_doc_LAW_103394/b990bf4a13bd23fda86e0bba50c462a174c0d123/) and the [new](https://www.consultant.ru/document/cons_doc_LAW_472684/64841be2c02d6fa0043e4c68d9dcd65391427794/) forms. One example: in a simplified form, accounts receivable used to be reflected in `line_1230`, whereas in the new form — in `line_1240`. We did not try to harmonize such transitions, opting for predictability, that is, agreement with the official source and the codes from the forms that were in effect at the corresponding periods. 
 - Geocoding quality improved substantially:
-    - In this version we employed a second geocoder, [Photon](https://photon.komoot.io/), that receives addresses for which [Nominatim](https://nominatim.org/) failed to provide precise (house-level) coordinates.
-    - Whereas before to assign geocoding quality we relied on `place_rank` from Nominatim's response, this time we implemented a more rigorous approach: the quality level is decided based on comparison of the original and response addresses normalized with [Pullenti Address SDK](https://garfias.ru/). If they match up to a house the value in `geocoding_quality` column is set to `"house"`, to the street — `"street"`, and `"city"` in all other cases where either of geocoders returned any coordinates at all. If the match level is the same for Nominatim and Photon, coordinates from Nominatim are used.  
+    - In this version we employed a second geocoder, [Photon](https://photon.komoot.io/), that receives the addresses for which [Nominatim](https://nominatim.org/) failed to provide precise (house-level) coordinates.
+    - Whereas before to assign geocoding quality we relied on `place_rank` from Nominatim's response, this time we implemented a more rigorous approach: the quality level is decided based on comparison of the original and response addresses normalized with [Pullenti Address SDK](https://garfias.ru/). If they match up to a house the value in `geocoding_quality` column is set to `"house"`, to the street — `"street"`, and `"city"` in all other cases where either of geocoders returned any coordinates at all. If the match level is the same for Nominatim and Photon, coordinates from Nominatim are used.
 <div align="center" width="60%">
     <img src="figures/geocoding_comparison.png" alt="Line plot comparing geocoding quality between RFSD versions" />
 </div>
