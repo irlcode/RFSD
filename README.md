@@ -194,7 +194,11 @@ The below figure explains how we constructed the data set. An annotated `Makefil
 │   │   ├── 6_adjust_values.R
 │   │   └── helpers
 │   │       ├── check_articulation_functions.R
-│   │       ├── lines_tags_dict.R
+│   │       ├── parsing_dicts
+│   │       │   ├── v5.03.R
+│   │       │   ├── v5.04.R
+│   │       │   ├── v5.08.R
+│   │       │   └── v5.10.R
 │   │       └── parsing_functions.R
 │   └── 2_geocoding
 │       ├── 1_set_up_nominatim_server.sh
