@@ -1,164 +1,184 @@
 library(data.table)
+library(fst)
 library(stringi)
-library(stringr)
 library(httr2)
 library(jsonlite)
 library(furrr)
-options(future.globals.maxSize = 2700*1024^2)
-plan(multisession, workers = 10)
 library(filelock)
+g <- glue::glue
 
-# Define temp dir
-temp_dir <- file.path("temp", "geocoding")
+n_workers <- floor(parallel::detectCores() * 2/3) # Set N cores for parallel computing
+
+options(future.globals.maxSize = 2700*1024^2)
+plan(multisession, workers = n_workers)
+
+setwd("YOUR_DIR")
 
 # Define the location of the lock files
-lock_file <- file.path(temp_dir, "write_document_lists.lck")
+lock_file <- "YOUR_DIR/write_document_lists.lck"
 
 # Define the location of the data file
-data_file <- file.path(temp_dir, "geocoded_addresses.csv")
-
-# Define the location of the file to store the caseids that were processed
-status_file <- file.path(temp_dir, "geocoded_addresses.status")
+data_file <- "YOUR_DIR/geocoded_addresses_nominatim.csv"
 
 # Load the addresses
-load(file.path(temp_dir, "addresses_to_geocode.rdata"))
+addresses_to_geocode <- read_fst("addresses_to_geocode.fst", as.data.table = T)
 
-# Expand abbreviations
-addresses_to_geocode[, street_processed := gsub("пр-кт", "проспект", street, fixed = T) ]
-addresses_to_geocode[, street_processed := gsub("ПР-КТ", "ПРОСПЕКТ", street_processed, fixed = T) ]
+if(file.exists(data_file)) {
+    prev_run <- fread(data_file, select = "addr_id")
+    address_to_geocode <- addresses_to_geocode[!prev_run, on = "addr_id"]
+}
 
-addresses_to_geocode[, street_house_processed := gsub("пр-кт", "проспект", street_house, fixed = T) ]
-addresses_to_geocode[, street_house_processed := gsub("ПР-КТ", "ПРОСПЕКТ", street_house_processed, fixed = T) ]
+addresses_to_geocode[, chunk := cut(1:.N, breaks = n_workers, labels = F, include.lowest = T)]
+addresses_to_geocode_list <- split(addresses_to_geocode[, .(addr_id, country, region, city, street, street_house, addr_string, chunk)], by = "chunk", keep.by = F)
 
-# Define columns of interest to return in the order of interest
-columns_of_interest <- c("postalcode", "region", "city", "street_house",
-                         "street", "place_id", "osm_type", "osm_id", "lat",
-                         "lon", "display_name", "place_rank", "category",
-                         "type", "importance", "address.house_number",
-                         "address.road", "address.suburb",
-                         "address.city_district", "address.town",
-                         "address.village", "address.city",
-                         "address.municipality","address.state",
-                         "address.ISO3166.2.lvl4", "address.region",
-                         "address.postcode")
+# Define columns of interest to return in the order of interes
+extr_values_from_list <- function(resp_list) {
+    resp_list <- list(
+                      addresstype.nominatim = resp_list[[1]]$addresstype,
+                      region.nominatim = resp_list[[1]]$address$state,
+                      city.nominatim = fcoalesce(lapply(c("city", "town", "municipality"),
+                                                        function(x) {
+                                                            v <- resp_list[[1]]$address[[x]]
+                                                            if(is.null(v)) {
+                                                                NA_character_
+                                                            } else { v }
+                                                        }
+                                                  )
+                      ),
+                      street.nominatim = resp_list[[1]]$address$road,
+                      house.nominatim = resp_list[[1]]$address$house_number,
+                      postalcode.nominatim = resp_list[[1]]$address$postcode,
+                      type.nominatim = resp_list[[1]]$type,
+                      category.nominatim = resp_list[[1]]$category,
+                      place_rank = resp_list[[1]]$place_rank,
+                      lon = resp_list[[1]]$lon,
+                      lat = resp_list[[1]]$lat
+    )
+    resp_list <- lapply(resp_list, function(x) ifelse(is.null(x), NA, x))
+    resp_list[2:4] <- lapply(resp_list[2:4], function(x) stri_replace_all_regex(x, "[^А-ЯЁа-яё0-9/\\s\\.-]", ""))
+    resp_list <- lapply(resp_list, function(x) stri_replace_all_regex(x, "\\s+", " "))
 
-# Destructive data header write
-#foolproof_fwrite(data.table(t(columns_of_interest)), file = data_file, append = F, quote = T, sep = ",",  eol = "\n", na = "", dec = ".", row.names = F, col.names = F, qmethod = c("escape"))
+    resp_list
+}
 
-# Split data.table with addresses into lists by region
-addresses_to_geocode_list <- split(addresses_to_geocode, by = "region")
+geocode <- function(query_list) {
+    tryCatch({
+
+        query <- req_retry(req_url_query(req_url_path(request(api_url), "/search"), !!!query_list), max_seconds = 5)
+
+        resp <- req_perform(query)
+
+        extr_values_from_list(resp_body_json(resp))
+
+    }, error = function(e) {
+
+        list(region.nominatim = NA_character_,
+             addresstype.nominatim = NA_character_,
+             city.nominatim = NA_character_,
+             street.nominatim = NA_character_,
+             house.nominatim = NA_character_,
+             postalcode.nominatim = NA_character_,
+             type.nominatim = NA_character_,
+             category.nominatim = NA_character_,
+             place_rank = NA_character_,
+             lon = NA_character_,
+             lat = NA_character_
+        )
+
+    })
+}
 
 # Declare API url with Nominatim
 api_url <- "http://0.0.0.0:8080/"
 
-void <- future_map(addresses_to_geocode_list, ~ {
+future_walk(addresses_to_geocode_list, ~ {
 
-	# Debug: addresses <- addresses_to_geocode_list[[3]][1:10000]
-	addresses <- .x
+                # Debug:
+                # # addresses <- addresses_to_geocode_list[[3]][1:1YOUR_DIR0]
+                addresses <- .x
 
-	# Loop through items
-	for(i in 1:nrow(addresses)) {
+                # Loop through items
+                for(i in 1:nrow(addresses)) {
 
-		# Debug: address <- addresses[1]
-		address <- addresses[i]
+                    # Debug: address <- addresses[1]
+                    address <- addresses[i]
 
-		# Specify parameters with street and house
-		url_params_street_house <- list(format = "jsonv2",
-			limit = "1",
-			addressdetails = "1",
-			extratags = "0",
-			country = ifelse(address$region %in% c("Донецкая область", "Запорожская область", "Херсонская область", "Луганская область"), "Украина", ifelse(address$region == "Байконур", "Казахстан", "Россия")), 
-			# postalcode = address$postalcode, # We will not use postal codes as they degrade results
-			state = address$region,
-			city = address$city,
-			street = address$street_house_processed,
-			countrycodes = "RU,UA",
-			dedupe = "1",
-			accept_language = "ru")
+                    # # Specify parameters with street and house
+                    url_params <- list(format = "jsonv2",
+                                       limit = "1",
+                                       addressdetails = "1",
+                                       extratags = "0",
+                                       country = address$country,
+                                       state = address$region,
+                                       city = address$city,
+                                       street = address$street_house,
+                                       countrycodes = "RU,UA",
+                                       dedupe = "1",
+                                       accept_language = "ru")
+                    url_params <- url_params[url_params != ""]
+                    resp_list <- geocode(url_params)
 
-		# Remove empty parameters
-		url_params_street_house <- url_params_street_house[!is.na(url_params_street_house)]
+                    # If street and house geocoding failed,
+                    # perform on street only
+                    if( all(is.na(resp_list)) ) {
 
-		# First query with street and house and postal code specified
-		query_street_house <- req_retry(req_url_query(req_url_path(request(api_url), "/search"), !!!url_params_street_house), max_seconds = 5)
+                        url_params <- list(format = "jsonv2",
+                                           limit = "1",
+                                           addressdetails = "1",
+                                           extratags = "0",
+                                           country = address$country,
+                                           state = address$region,
+                                           city = address$city,
+                                           street = address$street,
+                                           countrycodes = "RU,UA",
+                                           dedupe = "1",
+                                           accept_language = "ru")
 
-		resp_street_house <- req_perform(query_street_house)
+                        url_params <- url_params[url_params != ""]
+                        resp_list <- geocode(url_params)
+                    }
 
-		res <- as.data.table(resp_body_json(resp_street_house, simplifyVector = T))
+                    # If street geocoding failed,
+                    # perform on city
+                    if( all(is.na(resp_list)) ) {
 
-		# If street and house geocoding failed,
-		# perform on street only
-		if( nrow(res) == 0 ) {
+                        url_params <- list(format = "jsonv2",
+                                           limit = "1",
+                                           addressdetails = "1",
+                                           extratags = "0",
+                                           country = address$country,
+                                           state = address$region,
+                                           city = address$city,
+                                           countrycodes = "RU,UA",
+                                           dedupe = "1",
+                                           accept_language = "ru")
 
-			url_params_street <- url_params_street_house
-			url_params_street$street <- address$street_processed
+                        url_params <- url_params[url_params != ""]
+                        resp_list <- geocode(url_params)
 
-			url_params_street <- url_params_street[!is.na(url_params_street)]
+                    }
 
-			query_street <- req_retry(req_url_query(req_url_path(request(api_url), "/search"), !!!url_params_street), max_seconds = 5)
+                    # Export to CSV
+                    out <- c(address, resp_list)
 
-			resp_street <- req_perform(query_street)
+                    # Remove new lines
+                    variable_types <- sapply(out, class)
+                    character_variables <- names(variable_types[variable_types == "character"])
 
-			res <- as.data.table(resp_body_json(resp_street, simplifyVector = T))
+                    # Write to CSV
+                    file.lock <- lock(lock_file)
+                    fwrite(out, file = data_file, append = T, quote = T, eol = "\n", logical01 = T, qmethod = "escape", nThread = 1)
+                    unlock(file.lock)
 
-		}
+                }
+    }, .progress = T, .options = furrr_options( globals = c("lock_file", "data_file", "api_url", "extr_values_from_list", "geocode"), packages = c("data.table", "httr2", "jsonlite", "filelock", "stringi"), scheduling = T))
+# # 10K entries is 5.3 MB
+# # 7M entries is 7e6/1e4= 700 times more
 
-		# If street geocoding failed,
-		# perform on city
-		if( nrow(res) == 0 ) {
-
-			url_params_city <- url_params_street_house
-			url_params_city$street <- NA
-
-			url_params_city <- url_params_city[!is.na(url_params_city)]
-
-			query_city <- req_retry(req_url_query(req_url_path(request(api_url), "/search"), !!!url_params_city), max_seconds = 5)
-
-			resp_city <- req_perform(query_city)
-
-			res <- as.data.table(resp_body_json(resp_city, simplifyVector = T))
-
-		}
-
-		# Export to CSV
-		out <- address
-
-		# Add geocoding results if successful
-		if(nrow(res) > 0) {
-
-			out <- cbind(out, res)
-
-		}
-
-		# Keep only the columns of interest in the order of interest
-		names_outside_columns_of_interest <- columns_of_interest[!(columns_of_interest %in% names(out))]
-
-		if( length(names_outside_columns_of_interest) > 0) {
-			out[, c(names_outside_columns_of_interest) := NA_character_]
-		}
-		out <- out[, columns_of_interest, with = F]
-				
-		# Remove new lines
-		variable_types <- sapply(out, class)
-		character_variables <- names(variable_types[variable_types == "character"])
-	
-		out[, c(character_variables) := lapply(.SD, function(x) { gsub("\\s+", " ", x, perl = T) }), .SDcols = character_variables]
-	
-		# Double quotation marks to single
-		out[, c(character_variables) := lapply(.SD, function(x) { gsub('"', "'", x, fixed = T) }), .SDcols = character_variables]
-	
-		# Empty lines to NA
-		out[, names(out) := lapply(.SD, function(x) { ifelse(nchar(x) == 0, NA, x) }), .SDcols = names(out)]
-
-		# Write to CSV
-		file.lock <- lock(lock_file)
-		fwrite(out, file = data_file, append = T, quote = T, eol = "\n", logical01 = T, qmethod = "escape", nThread = 1)
-		unlock(file.lock)
-
-	}
-
-
-}, .progress = T, .options = furrr_options( globals = c("lock_file", "data_file", "status_file", "columns_of_interest", "api_url"), packages = c("data.table", "httr2", "jsonlite", "filelock"), scheduling = T))
-
-# 10K entries is 5.3 MB
-# 7M entries is 7e6/1e4= 700 times more
+# Load results and build address string to normalize
+nominatim_results <- fread(data_file)
+sapply(nominatim_results, function(x) mean(is.na(x)))
+nominatim_results[, addr_string.nominatim := stri_join(country, region.nominatim, city.nominatim, street.nominatim, house.nominatim, sep = ", ")]
+nominatim_results[, addr_string.nominatim := stri_replace_all_regex(addr_string.nominatim, "(, ){2,}", ", ")]
+nominatim_results[, addr_string.nominatim := stri_replace_all_regex(addr_string.nominatim, ", $", "")]
+fwrite(nominatim_results, data_file)

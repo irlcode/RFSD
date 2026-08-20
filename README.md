@@ -201,11 +201,18 @@ The below figure explains how we constructed the data set. An annotated `Makefil
 │   │       │   └── v5.10.R
 │   │       └── parsing_functions.R
 │   └── 2_geocoding
-│       ├── 1_set_up_nominatim_server.sh
-│       ├── 2_export_addresses.r
+│       ├── 1a_set_up_nominatim_server.sh
+│       ├── 1b_set_up_photon_server.sh
+│       ├── 1c_set_up_pullenti_server.sh
+│       ├── 2_build_addresses_to_geocode.R
 │       ├── 3_query_nominatim.r
-│       ├── 4_create_final_mapping.r
-│       └── 5_join_results_to_financials.R
+│       ├── 4_normalize_orig_and_nominatim_addresses.py
+│       ├── 5_query_photon.R
+│       ├── 6_normalize_photon_addresses.py
+│       ├── 7_combine_results.R
+│       └── pullenti
+│           ├── AddressMinPython
+│           └── AddressServer
 ├── use_cases
 │   ├── external_data
 │   │   └── VVP_god_s_1995-2024.xlsx
@@ -349,7 +356,7 @@ Below is our To-Do list, we will be grateful for any contributions you can make.
 - [ ] Improve next-year imputation procedure (https://github.com/irlcode/rfsd/issues/4)
 - [X] Explain differences with [Mogilyat et al. (2024)](https://github.com/irlcode/RFSD/blob/main/use_cases/interest_payments.md) (https://github.com/irlcode/rfsd/issues/5)
 - [ ] Explain differences with [Kaukin and Zhemkova (2023)](https://github.com/irlcode/RFSD/blob/main/use_cases/tfp.md) (https://github.com/irlcode/rfsd/issues/6)
-- [ ] Update replication code
+- [ ] Review replication code
 
 
 ## Licence

@@ -1,0 +1,28 @@
+﻿pullenti.address.AddressDbLevel: Уровень адресного элемента в записи БД
+pullenti.address.AddressDbRecord: Элементы адреса для заполнения БД
+pullenti.address.AddressHelper: Разные полезные функции
+pullenti.address.AddressService: Сервис работы с адресами
+pullenti.address.AddrLevel: Уровень адресного объекта
+pullenti.address.AddrObject: Адресный объект, выделяемый из текста (элемент TextAddress)
+pullenti.address.AreaAttributes: Атрибуты города, региона, района, квартала, улиц и т.п.
+pullenti.address.BaseAttributes: Базовый класс для атрибутивных классов: AreaAttributes, HouseAttributes, RoomAttributes, SpecialAttributes
+pullenti.address.DetailType: Тип детализирующего указателя
+pullenti.address.GarLevel: Уровень адресного объекта ГАР
+pullenti.address.GarObject: Адресный объект ГАР
+pullenti.address.GarParam: Типы параметров ГАР
+pullenti.address.GarStatistic: Статистика по объектам ГАР
+pullenti.address.GarStatus: Статус анализа ГАР-объекта (наименования, номера)
+pullenti.address.GpsObject: Объект GPS (прямоугольник или точка)
+pullenti.address.HouseAttributes: Атрибуты зданий и участков
+pullenti.address.HouseType: Типы зданий и участков
+pullenti.address.Message: Элемент сообщения
+pullenti.address.MessageCode: Код сообщение
+pullenti.address.ParamType: Дополнительные параметры адреса
+pullenti.address.ProcessTextParams: Параметры обработки текста
+pullenti.address.RoomAttributes: Атрибуты внутридомовых помещений (квартиры, комнаты), гаражей и машиномест
+pullenti.address.RoomType: Типы помещений
+pullenti.address.SearchParams: Параметры для поиска
+pullenti.address.SearchResult: Результат поискового запроса
+pullenti.address.SqlAddressHelper: Поддержка работы с СУБД
+pullenti.address.StroenType: Типы строений
+pullenti.address.TextAddress: Полный адрес, выделяемый из текста
