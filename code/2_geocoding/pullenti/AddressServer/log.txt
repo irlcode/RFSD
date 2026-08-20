@@ -1,0 +1,4 @@
+2026.08.13 20:45:19 Initializing SDK Pullenti Address ver 4.32 (2025.11.06) ... OK (by 999 ms)
+2026.08.13 20:45:20 IndexPath: /data1/_datasets/GARIndex/Index_nov25/GarAll, Version: , AddrObjs: 0, Houses: 0, Rooms: 0
+2026.08.13 20:45:20 Start server (address: *, port: 2222) ...  OK
+2026.08.13 20:45:20 Ready (to exit server press Enter key) ... 
