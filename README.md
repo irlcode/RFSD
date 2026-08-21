@@ -38,7 +38,8 @@ RFSD = load_dataset('irlspbru/RFSD')
 
 # Alternatively, this will download ~534 MB with all financial statements for 2025
 # to a Polars DataFrame (requires about 8 GB of RAM)
-RFSD_2025 = pl.read_parquet('hf://datasets/irlspbru/RFSD/RFSD/year=2025/*.parquet')
+# RFSD_2025 = pl.read_parquet('hf://datasets/irlspbru/RFSD/RFSD/year=2025/*.parquet')
+# NB: as of August 2026 this method of import is temporary broken, for details see: https://huggingface.co/datasets/John6666/forum3/blob/49b4b525c0a6b461a56934ba687af2426e9bdb49/datasets_polars_repo_fail_1.md
 ```
 
 We provide a file in `aux_data/descriptive_names_dict.csv` which can be used to change the original names of financial variables to user-friendly ones, e.g., `B_revenue` and `CFo_materials` in lieu of `line_2110` and `line_4121`, respectively. Prefixes are for disambiguation purposes: `B_` stands for balance sheet variables, `PL_` — profit and loss statement, `CFi_` and `CFo_` — cash inflows and cash outflows, etc. (One can find all the variable definitions in the supplementary materials table in the accompanying paper and [consult](https://www.consultant.ru/document/cons_doc_LAW_32453/) the original statement forms used by firms: full is `KND 0710099`, simplified — `KND 0710096`.)
