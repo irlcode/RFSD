@@ -182,7 +182,7 @@ The below figure explains how we constructed the data set. An annotated `Makefil
 ├── aux_data
 │   └── descriptive_names_dict.csv
 ├── code
-│   ├── 1_financials
+│   ├── 1_prepare_financials
 │   │   ├── 1a_collect_rosstat_data.R
 │   │   ├── 1b_build_rosstat_panel.R
 │   │   ├── 2a_collect_fns_xmls_ids.R
@@ -193,6 +193,8 @@ The below figure explains how we constructed the data set. An annotated `Makefil
 │   │   ├── 4_combine_rosstat_fns_panels.R
 │   │   ├── 5_build_articulation_panel.R
 │   │   ├── 6_adjust_values.R
+│   │   ├── 7_check_articulation_after_adjustment.R
+│   │   ├── 8_combine_original_and_adjusted_obs.R
 │   │   └── helpers
 │   │       ├── check_articulation_functions.R
 │   │       ├── parsing_dicts
@@ -254,7 +256,7 @@ The below figure explains how we constructed the data set. An annotated `Makefil
 ```
 ## Version and Update Policy
 
-Version (SemVer): `3.0.0`.
+Version (SemVer): `3.1.0`.
 
 We intend to update the RFSD annualy as the data becomes available, in other words when most of the firms have their statements filed with the Federal Tax Service. The official deadline for filing of previous year statements is April, 1. However, every year a portion of firms either fails to meet the deadline or submits corrections afterwards. As the figure below shows, filing continues up to the very end of the year but after the end of April this stream quickly thins out. Nevertheless, there is obviously a trade-off between minimization of data completeness and version availability. We find it a reasonable compromise to query new data in early June, since on average by the end of May 96.7% statements are already filed, including 86.4% of all the correcting filings. We plan to update RFSD annualy in late July — early August.
 
@@ -266,6 +268,16 @@ We intend to update the RFSD annualy as the data becomes available, in other wor
 ## Changelog
 
 All notable changes to this project will be documented below. The format is based on [Keep a Changelog](http://keepachangelog.com/).
+
+## [3.1.0] - 2026-09-02
+
+### Fixed
+- Fixed massive erroneous non-articulation issue in 2025. As stated in changelog for version 3.0.0, firms switched to reporting accounts receivable in `line_1240` (previously: `line_1230`). Ironically, having warned the users about this we fell into the trap ourselves: our totals adjustment procedure did not respect the switch resulting in incorrect values in `line_1600` and breaking articulation for many firms. 
+- Fixed an incoherity in marking all-zero observations as non-filed and non-imputed. The logic was first introduced in version 2.0.0, but its realization was faulty. Our financial data come from two sources, Rosstat and GIR BO. In the former, all missings are repesented by zeros, and since it is impossible to tell a true zero from a missing we replace all zeros with `NA`s in the period. In the latter, it is different: the data is parsed from XMLs and we can be sure that zeros have indeed been reported, so we do not replace them withs `NA`s. However, our code did not account for this difference between periods: we marked only all-`NA` cases, and not all-zero.
+- XML path for `line_3600` was broken while updating the parser for 3.0.0. Things are back to normal now.
+
+## Changed
+- Improved the totals adjustment procedure. We have noticed that adjustment broke articulation for several thousand observations each year. Now, we use adjusted statements only if they still articulate after changes made. If not, original statements are used. If a statement do not articulate neither before adjustement, nor after it, the adjusted version is used.  
 
 ## [3.0.0] - 2026-08-20
 
