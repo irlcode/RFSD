@@ -276,7 +276,7 @@ All notable changes to this project will be documented below. The format is base
 - Fixed an incoherity in marking all-zero observations as non-filed and non-imputed. The logic was first introduced in version 2.0.0, but its realization was faulty. Our financial data come from two sources, Rosstat and GIR BO. In the former, all missings are repesented by zeros, and since it is impossible to tell a true zero from a missing we replace all zeros with `NA`s in the period. In the latter, it is different: the data is parsed from XMLs and we can be sure that zeros have indeed been reported, so we do not replace them withs `NA`s. However, our code did not account for this difference between periods: we marked only all-`NA` cases, and not all-zero.
 - XML path for `line_3600` was broken while updating the parser for 3.0.0. Things are back to normal now.
 
-## Changed
+### Changed
 - Improved the totals adjustment procedure. We have noticed that adjustment broke articulation for several thousand observations each year. Now, we use adjusted statements only if they still articulate after changes made. If not, original statements are used. If a statement do not articulate neither before adjustement, nor after it, the adjusted version is used.  
 
 ## [3.0.0] - 2026-08-20
