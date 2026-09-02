@@ -88,8 +88,8 @@ gc()
 ```
 
     ##             used   (Mb) gc trigger   (Mb)   max used   (Mb)
-    ## Ncells  19005762 1015.1   41532831 2218.1   19009964 1015.3
-    ## Vcells 535850505 4088.3 1233347963 9409.7 1202530129 9174.6
+    ## Ncells  19005766 1015.1   41532608 2218.1   19009968 1015.3
+    ## Vcells 535851238 4088.3 1233349713 9409.8 1202531848 9174.6
 
 ``` r
 # Rename variables
@@ -111,18 +111,18 @@ close as possible.
 ## Only eligible firms filing statements or where we could reconstruct
 ## it from previous year data
 financials <- financials[eligible == 1 & (filed == 1 | imputed == 1)]
-uniqueN(financials$inn) # 3789880
+uniqueN(financials$inn) # 3733322
 ```
 
-    ## [1] 3789880
+    ## [1] 3733322
 
 ``` r
 ## Only firms in manufacturing
 financials <- financials[okved_section == "C"]
-uniqueN(financials$inn) # 329079
+uniqueN(financials$inn) # 326858
 ```
 
-    ## [1] 329079
+    ## [1] 326858
 
 # Deflation
 
@@ -193,29 +193,29 @@ financials <- financials[year >= 2012 & year <= 2018]
 
 ## Remove firms where at least one of variables is missing or is negative
 financials <- financials[ revenue > 0 & materials > 0 & capital > 0 & labour > 0 & investment > 0]
-uniqueN(financials$inn) # 31850
+uniqueN(financials$inn) # 31841
 ```
 
-    ## [1] 31850
+    ## [1] 31841
 
 ``` r
 ## Remove firms with zero or negative value added
 financials[, va := revenue - materials]
 financials <- financials[ va > 0]
-uniqueN(financials$inn) # 28647
+uniqueN(financials$inn) # 28640
 ```
 
-    ## [1] 28647
+    ## [1] 28640
 
 ``` r
 ## Remove firms with gaps in filing
 financials[, obs_per_firm := .N, by = "inn"]
 financials[, obs_per_firm_expected := max(year) - min(year) + 1, by = c("inn") ]
 financials <- financials[obs_per_firm_expected == obs_per_firm]
-uniqueN(financials$inn) # 24330
+uniqueN(financials$inn) # 24323
 ```
 
-    ## [1] 24330
+    ## [1] 24323
 
 ``` r
 ## Only firms active for more than 1 year

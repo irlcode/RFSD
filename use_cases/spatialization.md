@@ -77,13 +77,8 @@ available at a fine level of detail for this year.
 RFSD <- open_dataset("local/path/to/RFSD")
 scan_builder <- RFSD$NewScan()
 scan_builder$Filter(Expression$field_ref("year") == 2015)
-```
-
-``` r
 scan_builder$Project(cols = c("inn", "ogrn", "region", "year", "eligible", "filed", "imputed", "financial", "outlier", "line_2110", "line_4121", "geocoding_quality", "lon", "lat"))
-```
 
-``` r
 scanner <- scan_builder$Finish()
 financials <- as.data.table(scanner$ToTable())
 gc()
@@ -116,13 +111,13 @@ financials[revenue > 0 & materials > 0 & (revenue - materials) > 0, va := revenu
 
 # Remove firms with negative value added
 financials <- financials[va >  0]
-uniqueN(financials$inn) # 137794 firms
+uniqueN(financials$inn) # 137799 firms
 ```
 
 ``` r
 # Remove firms with low geocoding quality
 financials <- financials[geocoding_quality %in% c("house", "street")]
-uniqueN(financials$inn) # 122443 firms
+uniqueN(financials$inn) # 122421 firms
 ```
 
 # Aggregation
@@ -303,6 +298,7 @@ kummu_2015_1km <- rast("local/path/to/kummu_et_al_2018/GDP_PPP_30arcsec_v3.nc", 
 kummu_2015_1km <- crop(kummu_2015_1km, ext(vect(russia_boundary)))
 ```
 
+
 ``` r
 # To the same units
 ## 2011 Geary–Khamis dollars to billions of 2015 US dollars
@@ -334,9 +330,6 @@ extent <- c(xmin = 37.56, xmax = 37.7, ymin = 55.72, ymax = 55.784)
 
 financials_zoom <- st_crop(financials_agg_sf, st_bbox(extent))
 ```
-
-    ## Warning: attribute variables are assumed to be spatially constant throughout
-    ## all geometries
 
 ``` r
 kummu_2015_1km_zoom <- crop(x = kummu_2015_1km, y = ext(extent, xy = F))
