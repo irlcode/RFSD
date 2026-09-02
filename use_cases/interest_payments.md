@@ -76,8 +76,8 @@ gc()
 ```
 
     ##             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-    ## Ncells  11721260  626.0   22300035 1191.0  11725732  626.3
-    ## Vcells 359820989 2745.3  827983374 6317.1 821399852 6266.8
+    ## Ncells  11721475  626.0   22300751 1191.0  11725947  626.3
+    ## Vcells 359831650 2745.3  828008399 6317.3 821424838 6267.0
 
 ``` r
 # Rename variables
@@ -98,61 +98,61 @@ close as possible.
 ``` r
 # Only non-financial firms
 financials <- financials[okved_section != "K"]
-uniqueN(financials$inn) # 5003223
+uniqueN(financials$inn) # 5003225
 ```
 
-    ## [1] 5003223
+    ## [1] 5003225
 
 ``` r
 ## Only firms filing statements or where we could reconstruct
 ## it from previous year data
 cbr_sample <- financials[filed == 1 | imputed == 1]
-uniqueN(cbr_sample$inn) # 3236864
+uniqueN(cbr_sample$inn) # 2996612
 ```
 
-    ## [1] 3236864
+    ## [1] 2996612
 
 ``` r
 ## Remove firms where at least one of variables is missing
 cbr_sample <- cbr_sample[!is.na(revenue) & !is.na(costofgoodssold) & !is.na(salesprofit) & !is.na(grossprofit) ]
-uniqueN(cbr_sample$inn) # 2268104
+uniqueN(cbr_sample$inn) # 2255328
 ```
 
-    ## [1] 2268104
+    ## [1] 2255328
 
 ``` r
 ## Remove firms with zero revenue or cost of goods sold
 cbr_sample <- cbr_sample[revenue != 0 & costofgoodssold != 0]
-uniqueN(cbr_sample$inn) # 2177369
+uniqueN(cbr_sample$inn) # 2174904
 ```
 
-    ## [1] 2177369
+    ## [1] 2174904
 
 ``` r
 ## Remove firms where assets do not match liablities and equity
 cbr_sample <- cbr_sample[ assets == liabilities_equity ]
-uniqueN(cbr_sample$inn) # 2153277
+uniqueN(cbr_sample$inn) # 2172787
 ```
 
-    ## [1] 2153277
+    ## [1] 2172787
 
 ``` r
 ## Remove firms without interest payments
 cbr_sample <- cbr_sample[interestpayable != 0 & !is.na(interestpayable)]
-uniqueN(cbr_sample$inn) # 370331
+uniqueN(cbr_sample$inn) # 372456
 ```
 
-    ## [1] 370331
+    ## [1] 372456
 
 ``` r
 ## Remove outlier firms in terms of interestpayable to costofgoodssold ratio
 cbr_sample[, interest_cost_ratio := interestpayable/costofgoodssold]
 trim_cutoffs <- quantile(cbr_sample$interest_cost_ratio, c(0.015, 0.985))
 cbr_sample <- cbr_sample[ interest_cost_ratio >= trim_cutoffs[1] & interest_cost_ratio <= trim_cutoffs[2]]
-uniqueN(cbr_sample$inn) # 362932
+uniqueN(cbr_sample$inn) # 365002
 ```
 
-    ## [1] 362932
+    ## [1] 365002
 
 We also create a variable indicating companies with any debt:
 
